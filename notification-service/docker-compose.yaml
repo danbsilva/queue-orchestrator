@@ -1,0 +1,32 @@
+version: "3"
+
+networks:
+  micro_network:
+    external: true
+
+services:
+
+  # Notifications
+  notification-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: notification
+    environment:
+      APP_PORT: 2004
+    ports:
+      - '2004:2004'
+    expose:
+      - "2004"
+    volumes:
+      - ./.env:/app/.env
+      - ./src:/app/src
+      - ./main.py:/app/main.py
+    networks:
+      - micro_network
+    restart: always
+    #command: >
+    #  sh -c "flask db migrate && flask db upgrade && gunicorn -b :80 main:gunicorn_app"
+    command: >
+          sh -c "python main.py"
+

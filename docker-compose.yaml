@@ -1,0 +1,304 @@
+version: "3"
+
+networks:
+  micro_network:
+    external: true
+
+services:
+
+  # Kafka
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    networks:
+      - micro_network
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - 9092:9092
+      - 9094:9094
+    expose:
+      - "9092"
+      - "9094"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_LISTENERS: INTERNAL://:9092,OUTSIDE://:9094
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,OUTSIDE://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT
+    networks:
+      - micro_network
+
+  control-center:
+    image: confluentinc/cp-enterprise-control-center:latest
+    container_name: control-center
+    hostname: control-center
+    depends_on:
+      - kafka
+    ports:
+      - "9021:9021"
+    expose:
+      - "9021"
+    environment:
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'kafka:9092'
+      CONTROL_CENTER_REPLICATION_FACTOR: 1
+      PORT: 9021
+    networks:
+      - micro_network
+
+  topic-creator:
+    image: confluentinc/cp-kafka:latest
+    container_name: topic-creator
+    depends_on:
+      - control-center
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    networks:
+      - micro_network
+    command: >
+      bash -c "
+        kafka-topics --create --topic SEND_EMAIL_VALIDATION --partitions 2 --replication-factor 1 --bootstrap-server kafka:9092
+      "
+
+
+
+
+  # Redis
+  redis:
+    image: redis
+    container_name: rd_micro
+    ports:
+      - "6377:6379"
+    expose:
+      - "6379"
+    environment:
+      ALLOW_EMPTY_PASSWORD: yes
+    networks:
+      - micro_network
+    restart: always
+    command: redis-server
+
+  # Services
+  dbservices:
+    image: postgres
+    container_name: dbservices
+    environment:
+      POSTGRES_DB: services
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - '5400:5432'
+    expose:
+      - "5432"
+    depends_on:
+      - redis
+      - control-center
+    networks:
+      - micro_network
+    restart: always
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: gateway
+    environment:
+      APP_PORT: 2000
+    ports:
+      - '2000:2000'
+    expose:
+      - "2000"
+    volumes:
+      - ./api-gateway/migrations:/app/migrations
+      - ./api-gateway/.env:/app/.env
+      - ./api-gateway/src:/app/src
+      - ./api-gateway/main.py:/app/main.py
+    depends_on:
+      dbservices:
+        condition: service_healthy
+    networks:
+      - micro_network
+    restart: always
+    #command: >
+    #  sh -c "flask db migrate && flask db upgrade && gunicorn -b :80 main:gunicorn_app"
+    command: >
+          sh -c "flask db migrate && flask db upgrade && python main.py"
+
+
+
+  # Users
+  dbusers:
+    image: postgres
+    container_name: dbusers
+    environment:
+      POSTGRES_DB: user
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - '5402:5432'
+    expose:
+      - "5432"
+    networks:
+      - micro_network
+    restart: always
+
+  auth:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: auth
+    environment:
+      APP_PORT: 80
+    ports:
+      - '2001:80'
+    expose:
+      - "80"
+    volumes:
+      - ./auth-service/migrations:/app/migrations
+      - ./auth-service/.env:/app/.env
+      - ./auth-service/src:/app/src
+      - ./auth-service/main.py:/app/main.py
+    depends_on:
+      - dbusers
+      - api-gateway
+    networks:
+      - micro_network
+    restart: always
+    #command: >
+    #  sh -c "flask db migrate && flask db upgrade && gunicorn -b :80 main:gunicorn_app"
+    command: >
+      sh -c "flask db migrate && flask db upgrade && python main.py"
+      
+      
+
+
+
+
+  # Automations
+  dbautomations:
+    image: postgres
+    container_name: dbautomations
+    environment:
+      POSTGRES_DB: automation
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - '5403:5432'
+    expose:
+      - "5432"
+    networks:
+      - micro_network
+    restart: always
+
+  automations-service:
+    build:
+      context: ./automation-service
+      dockerfile: Dockerfile
+    container_name: automations
+    environment:
+      APP_PORT: 80
+    ports:
+      - '2002:80'
+    expose:
+      - "80"
+    volumes:
+      - ./automation-service/migrations:/app/migrations
+      - ./automation-service/.env:/app/.env
+      - ./automation-service/src:/app/src
+      - ./automation-service/main.py:/app/main.py
+    depends_on:
+      - dbautomations
+      - api-gateway
+    networks:
+      - micro_network
+    restart: always
+    #command: >
+    #  sh -c "flask db migrate && flask db upgrade && gunicorn -b :80 main:gunicorn_app"
+    command: >
+      sh -c "python main.py"
+      
+
+
+
+
+  # Logs
+  dblogs:
+    image: postgres
+    container_name: dblogs
+    environment:
+      POSTGRES_DB: log
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - '5404:5432'
+    expose:
+      - "5432"
+    networks:
+      - micro_network
+    restart: always
+
+  logs-service:
+    build:
+      context: ./log-service
+      dockerfile: Dockerfile
+    container_name: logs
+    environment:
+      APP_PORT: 80
+    ports:
+      - '2003:80'
+    expose:
+      - "80"
+    volumes:
+      - ./log-service/migrations:/app/migrations
+      - ./log-service/.env:/app/.env
+      - ./log-service/src:/app/src
+      - ./log-service/main.py:/app/main.py
+    depends_on:
+      - dblogs
+      - api-gateway
+    networks:
+      - micro_network
+    restart: always
+    #command: >
+    #  sh -c "flask db migrate && flask db upgrade && gunicorn -b :80 main:gunicorn_app"
+    command: >
+            sh -c "python main.py"
+
+
+
+
+
+  # Notifications
+  notifications-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: notifications
+    environment:
+      APP_PORT: 80
+    ports:
+      - '2004:80'
+    expose:
+      - "80"
+    volumes:
+      - ./notification-service/.env:/app/.env
+      - ./notification-service/src:/app/src
+      - ./notification-service/main.py:/app/main.py
+    depends_on:
+      - api-gateway
+    networks:
+      - micro_network
+    restart: always
+    #command: >
+    #  sh -c "flask db migrate && flask db upgrade && gunicorn -b :80 main:gunicorn_app"
+    command: >
+          sh -c "python main.py"

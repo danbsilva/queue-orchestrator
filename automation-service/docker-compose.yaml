@@ -1,0 +1,50 @@
+version: "3"
+
+networks:
+  micro_network:
+    external: true
+
+services:
+
+  # Automations
+  dbautomations:
+    image: postgres
+    container_name: dbautomations
+    environment:
+      POSTGRES_DB: automation
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - '5403:5432'
+    expose:
+      - "5432"
+    networks:
+      - micro_network
+    restart: always
+
+  automations-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: automations
+    environment:
+      APP_PORT: 2002
+    ports:
+      - '2002:2002'
+    expose:
+      - "2002"
+    volumes:
+      - ./migrations:/app/migrations
+      - ./.env:/app/.env
+      - ./src:/app/src
+      - ./main.py:/app/main.py
+    depends_on:
+      - dbautomations
+    networks:
+      - micro_network
+    restart: always
+    #command: >
+    #  sh -c "flask db migrate && flask db upgrade && gunicorn -b :80 main:gunicorn_app"
+    command: >
+          sh -c "python main.py"
+
