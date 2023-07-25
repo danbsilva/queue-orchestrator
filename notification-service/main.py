@@ -3,8 +3,10 @@ from src import threads, register
 
 from src import app, kafka, callbacks
 
+
 app = app.create_app()
 
+# Register service in API Gateway
 register.register_service(app=app)
 
 # Threads to consumer topics and send email validation to user register
@@ -17,7 +19,6 @@ if __name__ == '__main__':
     host = config_env("APP_HOST")
     port = config_env("APP_PORT")
     debug = config_env("DEBUG")
-
     app.run(host=host, port=port, debug=debug, use_reloader=debug)
 else:
     gunicorn_app = app

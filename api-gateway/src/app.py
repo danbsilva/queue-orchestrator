@@ -20,7 +20,7 @@ def create_app():
 
     @app.get('/')
     def index():
-        return {'service': 'api-gateway'}
+        return {'service': config_env('APP_NAME')}
 
     @app.before_request
     def add_transaction_id():

@@ -32,10 +32,12 @@
 
 1. Clone the repository
 ```bash
-git clone
+git clone https://github.com/danbsilva/queue-orquestration.git
 ```
 ## Usage
 <p align="justify">To use the project, you must follow the steps below:</p>
+
+<p align="justify">Atention: Verify the environment variables of each service in the docker-compose.yml file.</p>
 
 1. Enter the project folder
 ```bash
@@ -63,52 +65,67 @@ docker-compose up -d
 - **logs**: responsible for managing the logs service
 - **notifications**: responsible for managing the notifications service
 
-3. Access the api-gateway container
+3. Access the gateway container
 ```bash
-docker exec -it api-gateway bash
+docker exec -it gateway bash
 ```
 
-4. Create the migrations of the api-gateway
+4. Create the migrations of the gateway
 ```bash
-flask db init && flask db migrate && flask db upgrade
+flask db migrate && flask db upgrade
 ```
 
-5. Create the migrations of the users
+5. Access the auth container
 ```bash
-flask db init && flask db migrate && flask db upgrade
+docker exec -it auth bash
 ```
 
-6. Create the migrations of the automations
+6. Create the migrations of the auth
 ```bash
-flask db init && flask db migrate && flask db upgrade
+flask db migrate && flask db upgrade
 ```
 
-7. Create the migrations of the logs
+7. Access the automations container
 ```bash
-flask db init && flask db migrate && flask db upgrade
+docker exec -it automations bash
 ```
 
-8. Restart the api-gateway container
+8. Create the migrations of the automations
 ```bash
-docker restart api-gateway
+flask db migrate && flask db upgrade
 ```
 
-9. Restart the users container
+9. Access the logs container
 ```bash
-docker restart users
+docker exec -it logs bash
 ```
 
-10. Restart the automations container
+10. Create the migrations of the logs
+```bash
+flask db migrate && flask db upgrade
+```
+
+11. Restart the api-gateway container
+```bash
+docker restart gateway
+```
+
+12. Restart the auth container
+```bash
+docker restart auth
+```
+
+13. Restart the automations container
 ```bash
 docker restart automations
 ```
 
-11. Restart the logs container
+14. Restart the logs container
 ```bash
 docker restart logs
 ```
 
-12. Restart the notifications container
+15. Restart the notifications container
 ```bash
 docker restart notifications
 ```

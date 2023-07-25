@@ -4,7 +4,6 @@ from decouple import config as config_env
 from threading import Thread
 
 from flask import Flask, request
-
 from src import config, kafka
 
 

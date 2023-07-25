@@ -122,16 +122,14 @@ services:
       - ./api-gateway/.env:/app/.env
       - ./api-gateway/src:/app/src
       - ./api-gateway/main.py:/app/main.py
+      - ./api-gateway/entrypoint.sh:/app/entrypoint.sh
     depends_on:
-      dbservices:
-        condition: service_healthy
+      - dbservices
     networks:
       - micro_network
     restart: always
     #command: >
     #  sh -c "flask db migrate && flask db upgrade && gunicorn -b :80 main:gunicorn_app"
-    command: >
-          sh -c "flask db migrate && flask db upgrade && python main.py"
 
 
 
@@ -175,8 +173,6 @@ services:
     restart: always
     #command: >
     #  sh -c "flask db migrate && flask db upgrade && gunicorn -b :80 main:gunicorn_app"
-    command: >
-      sh -c "flask db migrate && flask db upgrade && python main.py"
       
       
 
@@ -223,9 +219,7 @@ services:
     restart: always
     #command: >
     #  sh -c "flask db migrate && flask db upgrade && gunicorn -b :80 main:gunicorn_app"
-    command: >
-      sh -c "python main.py"
-      
+
 
 
 
@@ -270,8 +264,6 @@ services:
     restart: always
     #command: >
     #  sh -c "flask db migrate && flask db upgrade && gunicorn -b :80 main:gunicorn_app"
-    command: >
-            sh -c "python main.py"
 
 
 
@@ -300,5 +292,3 @@ services:
     restart: always
     #command: >
     #  sh -c "flask db migrate && flask db upgrade && gunicorn -b :80 main:gunicorn_app"
-    command: >
-          sh -c "python main.py"
