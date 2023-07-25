@@ -497,7 +497,7 @@ class StepResource(Resource):
             return {'message': messages.INTERNAL_SERVER_ERROR}, 500
 
 
-# AUTOMATION ITEMS ##
+# ITEMS ##
 class ItemsByAutomationResource(Resource):
     @staticmethod
     @token_provider.verify_token
@@ -739,6 +739,77 @@ class ItemsByStepResource(Resource):
 
         except Exception as e:
             logging.send_log_kafka('CRITICAL', __module_name__, 'ItemsByStepResource.get', str(e))
+            return {'message': messages.INTERNAL_SERVER_ERROR}, 500
+
+
+class ItemInProcessResource(Resource):
+    @staticmethod
+    @token_provider.verify_token
+    @token_provider.admin_required
+    def patch(user_authenticated, item_uuid):
+        try:
+            item = repository_automation_item.get_by_uuid(uuid=item_uuid)
+            if not item:
+                logging.send_log_kafka('INFO', __module_name__, 'ItemInProcessResource.post',
+                                        f'Item {item_uuid} not found')
+                return {'message': messages.AUTOMATION_STEP_ITEM_NOT_FOUND}, 404
+
+            item.status = 'Running'
+            try:
+                repository_automation_item.update_status(item)
+                logging.send_log_kafka('INFO', __module_name__, 'ItemInProcessResource.post',
+                                         f'Item {item.uuid} is running')
+            except Exception as e:
+                logging.send_log_kafka('CRITICAL', __module_name__, 'ItemInProcessResource.post',
+                                       f'Error updating status by item: {e}')
+                return {'message': messages.INTERNAL_SERVER_ERROR}, 500
+
+            schema_item = schemas.AutomationItemGetSchema()
+            schema_data = schema_item.dump(item)
+
+            return {'item': schema_data}, 200
+
+        except Exception as e:
+            logging.send_log_kafka('CRITICAL', __module_name__, 'ItemInProcessResource.post',
+                                   str(e))
+            return {'message': messages.INTERNAL_SERVER_ERROR}, 500
+
+
+class ItemProcessedResource(Resource):
+    @staticmethod
+    @token_provider.verify_token
+    @token_provider.admin_required
+    def post(user_authenticated, item_uuid):
+        try:
+            data = request.get_json()
+            schema_validate = validate_schema(schemas.AutomationItemPostSchema(), data)
+            if schema_validate:
+                logging.send_log_kafka('INFO', __module_name__, 'ItemProcessedResource.post',
+                                       f'Schema validation error: {schema_validate}')
+                return {'message': schema_validate}, 400
+
+            item = repository_automation_item.get_by_uuid(uuid=item_uuid)
+            if not item:
+                logging.send_log_kafka('INFO', __module_name__, 'ItemProcessedResource.post',
+                                        f'Item {item_uuid} not found')
+                return {'message': messages.AUTOMATION_STEP_ITEM_NOT_FOUND}, 404
+
+
+
+            try:
+                repository_automation_item_history.create(automation_item=item, description=messages.ITEM_PROCESSED)
+            except Exception as e:
+                logging.send_log_kafka('CRITICAL', __module_name__, 'ItemProcessedResource.post',
+                                       f'Error creating history: {e}')
+
+            schema_item = schemas.AutomationItemGetSchema()
+            schema_data = schema_item.dump(item)
+
+            return {'item': schema_data}, 200
+
+        except Exception as e:
+            logging.send_log_kafka('CRITICAL', __module_name__, 'ItemProcessedResource.post',
+                                   str(e))
             return {'message': messages.INTERNAL_SERVER_ERROR}, 500
 
 

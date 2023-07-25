@@ -69,6 +69,7 @@ class UsersResource(Resource):
     @staticmethod
     @token_provider.verify_token
     @token_provider.admin_required
+    @cache.cached(timeout=60, query_string=True)
     def get(user_authenticated):
         try:
             page, per_page, offset = get_page_args()
@@ -102,6 +103,7 @@ class UsersResource(Resource):
 
 class UserResource(Resource):
     @staticmethod
+    @cache.cached(timeout=60, query_string=True)
     def get(user_uuid):
         try:
             user = repository.get_by_uuid(uuid=user_uuid)
@@ -190,6 +192,7 @@ class UserResource(Resource):
 class UserMeResource(Resource):
     @staticmethod
     @token_provider.verify_token
+    @cache.cached(timeout=60, query_string=True)
     def get(user_authenticated):
         try:
             user_schema = schemas.UserGetSchema()

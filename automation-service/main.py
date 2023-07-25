@@ -12,7 +12,7 @@ register.register_service(app=app)
 Thread(target=kafka.kafka_consumer, args=(app, 'PROCESSED_ITEMS', callbacks.items_processed,)).start()
 
 # Thread to consumer topic ITEMS_IN_PROCESS
-Thread(target=kafka.kafka_consumer, args=(app, 'ITEMS_IN_PROCESS', callbacks.items_in_progress,)).start()
+Thread(target=kafka.kafka_consumer, args=(app, 'ITEMS_IN_PROCESS', callbacks.items_in_process,)).start()
 
 
 if __name__ == '__main__':

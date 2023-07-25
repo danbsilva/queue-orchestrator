@@ -19,7 +19,7 @@ def verify_if_next_step_exists(msg, automation_item):
 
             description = f'{str(msg["status"])}'
             logging.send_log_kafka('EXCEPTION', __module_name__, 'verify_if_next_step_exists',
-                                   f'Item {msg["uuid"]} marked as Error.', msg["transaction_id"])
+                                   f'Item {msg["uuid"]} marked as Error', msg["transaction_id"])
 
         else:
             current_step, message = next_step_exists(msg, automation_item)
@@ -105,7 +105,7 @@ def items_processed(app, key, msg):
                 else:
                     description = verify_if_next_step_exists(msg, automation_item)
                     logging.send_log_kafka('INFO', __module_name__, 'items_processed',
-                                           f'Item {msg["uuid"]} processed successfully.', msg["transaction_id"])
+                                           f'Item {msg["uuid"]} processed successfully', msg["transaction_id"])
 
             new_item = {
                 "data": msg['data'],
@@ -120,13 +120,13 @@ def items_processed(app, key, msg):
             try:
                 repository_automation_item.update(automation_item, new_item)
                 logging.send_log_kafka('INFO', __module_name__, 'items_processed',
-                                       f'Item {msg["uuid"]} updated successfully.', msg["transaction_id"])
+                                       f'Item {msg["uuid"]} updated successfully', msg["transaction_id"])
             except Exception as e:
                 logging.send_log_kafka('CRITICAL', __module_name__, 'items_processed', e.args[0],
                                        msg["transaction_id"])
 
 
-def items_in_progress(app, key, msg):
+def items_in_process(app, key, msg):
     with app.app_context():
         automation_item = repository_automation_item.get_by_uuid(uuid=msg['uuid'])
         if automation_item:
@@ -134,7 +134,7 @@ def items_in_progress(app, key, msg):
             try:
                 repository_automation_item.update_status(automation_item)
                 logging.send_log_kafka('INFO', __module_name__, 'items_in_progress',
-                                       f'Item {msg["uuid"]} is running.', msg["transaction_id"])
+                                       f'Item {msg["uuid"]} is running', msg["transaction_id"])
             except Exception as e:
                 logging.send_log_kafka('CRITICAL', __module_name__, 'items_in_progress', e.args[0],
                                        msg["transaction_id"])
