@@ -1,7 +1,11 @@
 #!/bin/sh
 
-if [ ! -d "migrations/versions" ]; then
-    flask db init
-fi
+#if [ ! -d "migrations/versions" ]; then
+#    flask db init
+#fi
 
-gunicorn -b :2000 -w 4 main:app
+#while [ ! -d "migrations/versions" ]; do
+#  sleep 10
+#done
+
+gunicorn -b :2000 main:main_app --reload

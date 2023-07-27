@@ -4,6 +4,7 @@ WORKDIR /app
 COPY requirements.txt .
 COPY main.py .
 COPY src ./src
+COPY .env .
 COPY entrypoint.sh .
 
 RUN pip install --upgrade pip setuptools wheel

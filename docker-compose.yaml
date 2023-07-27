@@ -1,28 +1,35 @@
-version: "3"
-
-networks:
-  micro_network:
-    external: true
+version: "3.8"
 
 services:
 
-  # Kafka
+  # Zookeeper
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
     networks:
-      - micro_network
+      - queue_orchestrator
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+      - zookeeper_log:/var/lib/zookeeper/log
+      - zookeeper_secrets:/etc/zookeeper/secrets
+    healthcheck:
+      test: ["CMD", "zookeeper-shell", "localhost:2181", "ls", "/"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: on-failure
 
+  # Kafka
   kafka:
     image: confluentinc/cp-kafka:latest
     container_name: kafka
     depends_on:
       - zookeeper
     ports:
-      - 9092:9092
-      - 9094:9094
+      - "9092:9092"
+      - "9094:9094"
     expose:
       - "9092"
       - "9094"
@@ -35,14 +42,25 @@ services:
       KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,OUTSIDE://localhost:9094
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT
     networks:
-      - micro_network
+      - queue_orchestrator
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+      - kafka_secrets:/etc/kafka/secrets
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "kafka:9092", "--list"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: on-failure
 
+  # Control Center
   control-center:
     image: confluentinc/cp-enterprise-control-center:latest
     container_name: control-center
     hostname: control-center
     depends_on:
-      - kafka
+        kafka:
+          condition: service_healthy
     ports:
       - "9021:9021"
     expose:
@@ -52,44 +70,41 @@ services:
       CONTROL_CENTER_REPLICATION_FACTOR: 1
       PORT: 9021
     networks:
-      - micro_network
-
-  topic-creator:
-    image: confluentinc/cp-kafka:latest
-    container_name: topic-creator
-    depends_on:
-      - control-center
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-    networks:
-      - micro_network
-    command: >
-      bash -c "
-        kafka-topics --create --topic SEND_EMAIL_VALIDATION --partitions 2 --replication-factor 1 --bootstrap-server kafka:9092
-      "
-
-
-
+      - queue_orchestrator
+    volumes:
+      - control-center_data:/var/lib/confluent-control-center
+    healthcheck:
+        test: ["CMD", "wget", "-q", "--spider", "http://localhost:9021/"]
+        interval: 5s
+        timeout: 5s
+        retries: 5
+    restart: on-failure
 
   # Redis
   redis:
-    image: redis
-    container_name: rd_micro
+    image: redis:alpine
+    container_name: redis
     ports:
-      - "6377:6379"
+      - "6379:6379"
     expose:
       - "6379"
     environment:
       ALLOW_EMPTY_PASSWORD: yes
     networks:
-      - micro_network
-    restart: always
+      - queue_orchestrator
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: on-failure
     command: redis-server
 
-  # Services
-  dbservices:
-    image: postgres
+  # Services and Gateway
+  gateway-db:
+    image: postgres:alpine
     container_name: dbservices
     environment:
       POSTGRES_DB: services
@@ -99,14 +114,23 @@ services:
       - '5400:5432'
     expose:
       - "5432"
-    depends_on:
-      - redis
-      - control-center
     networks:
-      - micro_network
-    restart: always
+      - queue_orchestrator
+    depends_on:
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - dbservices_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "psql", "services", "-U", "admin"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: on-failure
 
-  api-gateway:
+  gateway:
     build:
       context: ./api-gateway
       dockerfile: Dockerfile
@@ -118,24 +142,22 @@ services:
     expose:
       - "2000"
     volumes:
-      - ./api-gateway/migrations:/app/migrations
-      - ./api-gateway/.env:/app/.env
-      - ./api-gateway/src:/app/src
-      - ./api-gateway/main.py:/app/main.py
-      - ./api-gateway/entrypoint.sh:/app/entrypoint.sh
+      - ./api-gateway/:/app/
     depends_on:
-      - dbservices
+      gateway-db:
+        condition: service_healthy
     networks:
-      - micro_network
-    restart: always
-    #command: >
-    #  sh -c "flask db migrate && flask db upgrade && gunicorn -b :80 main:gunicorn_app"
-
-
+      - queue_orchestrator
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:2000/health/"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: on-failure
 
   # Users
-  dbusers:
-    image: postgres
+  auth-db:
+    image: postgres:alpine
     container_name: dbusers
     environment:
       POSTGRES_DB: user
@@ -146,8 +168,18 @@ services:
     expose:
       - "5432"
     networks:
-      - micro_network
-    restart: always
+      - queue_orchestrator
+    depends_on:
+      gateway:
+        condition: service_healthy
+    volumes:
+      - dbusers_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "psql", "user", "-U", "admin"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: on-failure
 
   auth:
     build:
@@ -161,27 +193,23 @@ services:
     expose:
       - "80"
     volumes:
-      - ./auth-service/migrations:/app/migrations
-      - ./auth-service/.env:/app/.env
-      - ./auth-service/src:/app/src
-      - ./auth-service/main.py:/app/main.py
+      - ./auth-service/:/app/
     depends_on:
-      - dbusers
-      - api-gateway
+      auth-db:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:80/health/" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
-      - micro_network
-    restart: always
-    #command: >
-    #  sh -c "flask db migrate && flask db upgrade && gunicorn -b :80 main:gunicorn_app"
+      - queue_orchestrator
+    restart: on-failure
       
-      
-
-
-
 
   # Automations
-  dbautomations:
-    image: postgres
+  automations-db:
+    image: postgres:alpine
     container_name: dbautomations
     environment:
       POSTGRES_DB: automation
@@ -192,8 +220,18 @@ services:
     expose:
       - "5432"
     networks:
-      - micro_network
-    restart: always
+      - queue_orchestrator
+    depends_on:
+      gateway:
+        condition: service_healthy
+    volumes:
+      - dbautomations_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "psql", "automation", "-U", "admin"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: on-failure
 
   automations-service:
     build:
@@ -207,26 +245,22 @@ services:
     expose:
       - "80"
     volumes:
-      - ./automation-service/migrations:/app/migrations
-      - ./automation-service/.env:/app/.env
-      - ./automation-service/src:/app/src
-      - ./automation-service/main.py:/app/main.py
+      - ./automation-service/:/app/
     depends_on:
-      - dbautomations
-      - api-gateway
+      automations-db:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:80/health/" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
-      - micro_network
-    restart: always
-    #command: >
-    #  sh -c "flask db migrate && flask db upgrade && gunicorn -b :80 main:gunicorn_app"
-
-
-
-
+      - queue_orchestrator
+    restart: on-failure
 
   # Logs
-  dblogs:
-    image: postgres
+  logs-db:
+    image: postgres:alpine
     container_name: dblogs
     environment:
       POSTGRES_DB: log
@@ -237,8 +271,18 @@ services:
     expose:
       - "5432"
     networks:
-      - micro_network
-    restart: always
+      - queue_orchestrator
+    depends_on:
+      gateway:
+        condition: service_healthy
+    volumes:
+      - dblogs_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "psql", "log", "-U", "admin"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: on-failure
 
   logs-service:
     build:
@@ -252,22 +296,18 @@ services:
     expose:
       - "80"
     volumes:
-      - ./log-service/migrations:/app/migrations
-      - ./log-service/.env:/app/.env
-      - ./log-service/src:/app/src
-      - ./log-service/main.py:/app/main.py
+      - ./log-service/:/app/
     depends_on:
-      - dblogs
-      - api-gateway
+      logs-db:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:80/health/" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
-      - micro_network
-    restart: always
-    #command: >
-    #  sh -c "flask db migrate && flask db upgrade && gunicorn -b :80 main:gunicorn_app"
-
-
-
-
+      - queue_orchestrator
+    restart: on-failure
 
   # Notifications
   notifications-service:
@@ -282,13 +322,45 @@ services:
     expose:
       - "80"
     volumes:
-      - ./notification-service/.env:/app/.env
-      - ./notification-service/src:/app/src
-      - ./notification-service/main.py:/app/main.py
+      - ./notification-service/:/app/
     depends_on:
-      - api-gateway
+      gateway:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:80/health/" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
-      - micro_network
+      - queue_orchestrator
     restart: always
-    #command: >
-    #  sh -c "flask db migrate && flask db upgrade && gunicorn -b :80 main:gunicorn_app"
+
+# Networks
+networks:
+  queue_orchestrator:
+    external: true
+
+# Volumes
+volumes:
+  # Zookeeper
+  zookeeper_data:
+  zookeeper_log:
+  zookeeper_secrets:
+
+  # Kafka
+  kafka_data:
+  kafka_secrets:
+
+  # Control Center
+  control-center_data:
+
+  # Redis
+  redis_data:
+
+  # Dbs
+  dbservices_data:
+  dbusers_data:
+  dbautomations_data:
+  dblogs_data:
+
+

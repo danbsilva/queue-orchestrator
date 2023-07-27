@@ -1,11 +1,12 @@
 import time
+import uuid
 from datetime import datetime
 from decouple import config as config_env
 from threading import Thread
 
 from flask import Flask, request
 from src import config, kafka
-
+from src import admin
 
 def minimal_app():
     app = Flask(config_env('APP_NAME'))
@@ -27,6 +28,8 @@ def create_app():
 
     @app.after_request
     def register_request_log(response):
+        if request.endpoint == 'health':
+            return response
 
         payload = {
             'datetime': str(datetime.now()),
@@ -43,5 +46,7 @@ def create_app():
         Thread(target=kafka.kafka_producer, args=('REQUESTS_LOGS', app.name, payload, )).start()
 
         return response
+
+    admin.create_admin(app=app)
 
     return app

@@ -1,3 +1,4 @@
+import os
 import time
 from datetime import datetime
 from threading import Thread
@@ -7,10 +8,12 @@ from flask import Flask, request
 from src import config, kafka
 import uuid
 
+settings = os.path.join(os.path.dirname(__file__), 'settings.py')
+
 
 def minimal_app():
     app = Flask(config_env('APP_NAME'))
-    app.config.from_pyfile('src/settings.py')
+    app.config.from_pyfile(settings)
     config.init_app(app=app)
     return app
 
@@ -18,9 +21,9 @@ def minimal_app():
 def create_app():
     app = minimal_app()
 
-    @app.get('/')
-    def index():
-        return {'service': config_env('APP_NAME')}
+    @app.route('/health/', methods=['GET'])
+    def health():
+        return 'OK'
 
     @app.before_request
     def add_transaction_id():
@@ -35,6 +38,8 @@ def create_app():
 
     @app.after_request
     def register_request_log(response):
+        if request.endpoint == 'health':
+            return response
 
         payload = {
             'datetime': str(datetime.now()),

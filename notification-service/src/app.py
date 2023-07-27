@@ -27,6 +27,9 @@ def create_app():
 
     @app.after_request
     def register_request_log(response):
+        if request.endpoint == 'health':
+            return response
+
         payload = {
             'datetime': str(datetime.now()),
             'service': app.name,
