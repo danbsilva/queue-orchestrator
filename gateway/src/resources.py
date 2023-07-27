@@ -99,12 +99,12 @@ class ForwardRequestResource(Resource):
 
             # if the service is not registered, return 404
             if not service:
-                logging.send_log_kafka('CRITICAL', __module_name__, 'ForwardRequestResource.dispatch_request',
+                logging.send_log_kafka('INFO', __module_name__, 'ForwardRequestResource.dispatch_request',
                                        messages.SERVICE_NAME_NOT_FOUND)
                 return {'message': messages.SERVICE_NAME_NOT_FOUND}, 404
 
             if not service.service_status:
-                logging.send_log_kafka('CRITICAL', __module_name__, 'ForwardRequestResource.dispatch_request',
+                logging.send_log_kafka('INFO', __module_name__, 'ForwardRequestResource.dispatch_request',
                                        messages.SERVICE_UNAVAILABLE)
                 return {'message': messages.SERVICE_UNAVAILABLE}, 503
 
@@ -135,14 +135,23 @@ class ForwardRequestResource(Resource):
 
                     # verify if the route requires authentication
                     if route.required_auth:
-                        token_validation = token_provider.verify_token()
-                        if token_validation[1] >= 400:
-                            # return {'message': token_validation[0]}, token_validation[1]
-                            print(token_validation[0])
+                        token_validation = token_provider.token_required()  # validate the token
+                        if token_validation[1] >= 400:  # if the token is invalid, return the error
+                            logging.send_log_kafka('INFO', __module_name__, 'ForwardRequestResource.dispatch_request',
+                                                    token_validation[0]['message'])
+                            return token_validation[0], token_validation[1]
+
+                    # verify if the route requires admin
+                    if route.required_admin:
+                        admin_validation = token_provider.admin_required()  # validate if the user is admin
+                        if admin_validation[1] >= 400:  # if the user is not admin, return 401
+                            logging.send_log_kafka('INFO', __module_name__, 'ForwardRequestResource.dispatch_request',
+                                                    admin_validation[0]['message'])
+                            return admin_validation[0], admin_validation[1]
 
                     # Verify if the method is allowed
                     if request.method not in route.methods_allowed:
-                        logging.send_log_kafka('CRITICAL', __module_name__, 'ForwardRequestResource.dispatch_request',
+                        logging.send_log_kafka('INFO', __module_name__, 'ForwardRequestResource.dispatch_request',
                                                messages.METHOD_NOT_ALLOWED)
                         return {'message': messages.METHOD_NOT_ALLOWED}, 405
 
@@ -150,9 +159,11 @@ class ForwardRequestResource(Resource):
 
                         headers = dict(request.headers)
                         headers['X-TRANSACTION-ID'] = request.transaction_id
+                        headers['X-ORIGIN'] = config_env('ORIGIN')
 
                         # Forward the request to the microservice
                         url = f'{service.service_host}/{service.service_name}/{path if path else ""}'
+
                         response = requests.request(
                             method=request.method,
                             url=url,
@@ -168,7 +179,6 @@ class ForwardRequestResource(Resource):
                             headers=dict(response.headers),
                         )
                     except requests.exceptions.RequestException as e:
-                        print(e.args[0])
 
                         logging.send_log_kafka('CRITICAL', __module_name__, 'ForwardRequestResource.dispatch_request',
                                                e.args[0])

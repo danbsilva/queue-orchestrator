@@ -13,8 +13,8 @@ api.add_resource(resources.AutomationsResource, '/automations/',
                  methods=['POST', 'GET'])
 api.add_resource(resources.AutomationResource, '/automations/<automation_uuid>/',
                  methods=['GET', 'PATCH', 'DELETE'])
-api.add_resource(resources.AutomationMeResource, '/automations/me/',
-                 methods=['POST', 'GET'])
+api.add_resource(resources.AutomationMeResource, '/automations/me/<user_uuid>/',
+                 methods=['GET'])
 api.add_resource(resources.OwnersByAutomationResource, '/automations/<automation_uuid>/owners/',
                  methods=['GET'])
 

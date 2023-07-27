@@ -1,9 +1,11 @@
 import json
 from datetime import datetime
 from threading import Thread
-
 from src import repository_service_routes, kafka
 from src import repository_service
+
+
+__module_name__ = 'src.callbacks'
 
 
 def service_register(app, key, msg):
@@ -34,9 +36,9 @@ def service_register(app, key, msg):
             log = {
                 'datetime': str(datetime.now()),
                 'level': 'CRITICAL',
-                'service_name': 'api-gateway',
+                'service_name': 'gateway',
                 'module_name': 'src.callbacks',
                 'function_name': 'service_register',
                 'message': e.args[0]
             }
-            Thread(target=kafka.kafka_producer, args=('LOGS', 'api-gateway', log,)).start()
+            Thread(target=kafka.kafka_producer, args=('LOGS', 'gateway', log,)).start()

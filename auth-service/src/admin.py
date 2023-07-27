@@ -1,11 +1,16 @@
 from src import repository
+from threading import Thread
+
+from src import kafka
+from uuid import uuid4
+from src import schemas
 
 
 def create_admin(app):
     with app.app_context():
         user = repository.get_by_email(email='admin@admin.com')
         if not user:
-            user = {
+            new_user = {
                 'username':'admin',
                 'email':'admin@admin.com',
                 'name':'admin',
@@ -15,4 +20,5 @@ def create_admin(app):
                 'is_admin':True
             }
 
-            repository.create(user)
+            repository.create(new_user)
+

@@ -22,7 +22,8 @@ def get_by_service_id(service_id):
 
 def update(service_route, new_service_route):
     for key, value in new_service_route.items():
-        setattr(service_route, key, value)
+        if service_route.__getattribute__(key) != value:
+            setattr(service_route, key, value)
 
     db.session.commit()
 

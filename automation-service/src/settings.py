@@ -34,9 +34,6 @@ CACHE_DEFAULT_TIMEOUT = config_env('CACHE_DEFAULT_TIMEOUT')
 # KAFKA
 KAFKA_SERVER = config_env('KAFKA_SERVER')
 
-# TOPICS
-TOPIC_SEND_EMAIL_VALIDATION = config_env('TOPIC_SEND_EMAIL_VALIDATION')
-
 EXTENSIONS = [
     'src.routes:init_app',
     'src.extensions.flask_sqlalchemy:init_app',

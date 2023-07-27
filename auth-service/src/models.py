@@ -25,7 +25,7 @@ class User(db.Model):
         return '<User %r>' % self.name
 
     def generate_uuid(self):
-        self.uuid = uuid4().hex
+        self.uuid = str(uuid4())
 
     def generate_username(self):
         self.username = self.uuid

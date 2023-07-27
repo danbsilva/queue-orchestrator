@@ -40,7 +40,8 @@ class ServiceRoutes(db.Model):
     route = db.Column(db.String, nullable=False)
     args = db.Column(db.String, nullable=True)
     methods_allowed = db.Column(db.JSON, nullable=False)
-    required_auth = db.Column(db.Boolean, nullable=False)
+    required_auth = db.Column(db.Boolean, nullable=False, default=True)
+    required_admin = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
@@ -53,6 +54,7 @@ class ServiceRoutes(db.Model):
             'args': self.args,
             'methods_allowed': self.methods_allowed,
             'required_auth': self.required_auth,
+            'required_admin': self.required_admin,
             'created_at': self.created_at,
             'updated_at': self.updated_at,
         }

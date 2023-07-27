@@ -1,13 +1,13 @@
-# Queue Orquestration
+# Queue Orchestrator
 
 ## Description
-<p align="justify">This project is a simple implementation of a queue orquestration system. It was developed using the Python(Flask) programming language and the KAFKA message broker.</p>
+<p align="justify">This project is a simple implementation of a queue orchestrator system. It was developed using the Python(Flask) programming language and the KAFKA message broker.</p>
 
 ## Services
 <p align="justify">The project is composed of the following services:</p>
 
 ### FLASK - PYTHON3
-- **api-gateway**: responsible for managing the requests of the users
+- **gateway**: responsible for managing the requests of the users
 - **auth**: responsible for managing the authentication of the users
 - **automations**: responsible for managing the automations of the users
 - **logs**: responsible for managing the logs of the users
@@ -32,19 +32,15 @@
 
 1. Clone the repository
 ```bash
-git clone https://github.com/danbsilva/queue-orquestration.git
+git clone https://github.com/danbsilva/queue-orchestrator.git
 ```
-## Usage
-<p align="justify">To use the project, you must follow the steps below:</p>
 
-<p align="justify">Atention: Verify the environment variables of each service in the docker-compose.yml file.</p>
-
-1. Enter the project folder
+2. Enter the project folder
 ```bash
-cd queue-orquestration
+cd queue-orchestrator
 ```
 
-2. Execute the Docker Compose
+3. Execute the Docker Compose
 ```bash
 docker-compose up -d
 ```
@@ -56,7 +52,7 @@ docker-compose up -d
 - **topic-creator**: responsible for creating the topics of the KAFKA cluster
 - **redis**: responsible for managing the Redis cluster
 - **dbservices**: responsible for managing the database of api-gateway
-- **api-gateway**: responsible for managing the api-gateway
+- **gateway**: responsible for managing the api-gateway
 - **dbusers**: responsible for managing the database of users
 - **auth**: responsible for managing the authentication service
 - **dbautomations**: responsible for managing the database of automations
@@ -65,72 +61,34 @@ docker-compose up -d
 - **logs**: responsible for managing the logs service
 - **notifications**: responsible for managing the notifications service
 
-3. Access the gateway container
-```bash
-docker exec -it gateway bash
+
+# Usage
+
+## Gateway
+<p align="justify">The API Gateway is responsible for managing the requests of the users. The requests are sent to the API Gateway and it redirects the request to the correct service.</p>
+
+### Endpoints
+<p align="justify">The API Gateway has the following endpoints:</p>
+
+#### POST /auth/login
+
+
+##### Request
+```json
+{
+    "email": "admin@admin.com",
+    "password": "admin"
+}
 ```
 
-4. Create the migrations of the gateway
-```bash
-flask db migrate && flask db upgrade
+#### Response
+```json
+{
+    "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+}
 ```
 
-5. Access the auth container
-```bash
-docker exec -it auth bash
-```
-
-6. Create the migrations of the auth
-```bash
-flask db migrate && flask db upgrade
-```
-
-7. Access the automations container
-```bash
-docker exec -it automations bash
-```
-
-8. Create the migrations of the automations
-```bash
-flask db migrate && flask db upgrade
-```
-
-9. Access the logs container
-```bash
-docker exec -it logs bash
-```
-
-10. Create the migrations of the logs
-```bash
-flask db migrate && flask db upgrade
-```
-
-11. Restart the api-gateway container
-```bash
-docker restart gateway
-```
-
-12. Restart the auth container
-```bash
-docker restart auth
-```
-
-13. Restart the automations container
-```bash
-docker restart automations
-```
-
-14. Restart the logs container
-```bash
-docker restart logs
-```
-
-15. Restart the notifications container
-```bash
-docker restart notifications
-```
-
-
+<p align="justify">The token must be sent in the header of the requests to the other endpoints.</p>
 
 
 

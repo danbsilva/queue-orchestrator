@@ -138,3 +138,4 @@ def items_in_process(app, key, msg):
             except Exception as e:
                 logging.send_log_kafka('CRITICAL', __module_name__, 'items_in_progress', e.args[0],
                                        msg["transaction_id"])
+

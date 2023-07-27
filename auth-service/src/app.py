@@ -43,7 +43,7 @@ def create_app():
             'duration': time.time() - request.start_time
         }
 
-        Thread(target=kafka.kafka_producer, args=('REQUESTS_LOGS', app.name, payload, )).start()
+        Thread(target=kafka.kafka_producer, args=(config_env('TOPIC_REQUESTS_LOGS'), app.name, payload, )).start()
 
         return response
 

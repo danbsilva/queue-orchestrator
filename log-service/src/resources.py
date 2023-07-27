@@ -9,7 +9,8 @@ from src.extensions.flask_cache import cache
 
 from src import schemas, messages, logging
 from src import repository_service_log, repository_request_log
-from src.providers import token_provider
+from src.providers import cors_provider
+from werkzeug.exceptions import UnsupportedMediaType
 
 
 __module_name__ = 'src.resources'
@@ -34,11 +35,18 @@ def validate_schema(schema, data):
 class LogsServicesResource(Resource):
 
     @staticmethod
-    @token_provider.verify_token
-    @token_provider.admin_required
-    def post(user_authenticated):
+    @cors_provider.origins_allowed
+    def post():
         try:
-            data = request.get_json()
+            try:
+                data = request.get_json()
+            except UnsupportedMediaType as e:
+                logging.send_log_kafka('INFO', __module_name__, 'LogsServicesResource.post', str(e))
+                return {'message': messages.UNSUPPORTED_MEDIA_TYPE}, 415
+            except Exception as e:
+                logging.send_log_kafka('INFO', __module_name__, 'LogsServicesResource', str(e))
+                return {'message': messages.BAD_REQUEST}, 400
+
             schema_validate = validate_schema(schemas.ServiceLogPostSchema(), data)
             if schema_validate:
                 logging.send_log_kafka('INFO', __module_name__, 'post', f'Error to create log: {schema_validate}')
@@ -57,10 +65,9 @@ class LogsServicesResource(Resource):
             return {'message': messages.INTERNAL_SERVER_ERROR}, 500
 
     @staticmethod
-    @token_provider.verify_token
-    @token_provider.admin_required
+    @cors_provider.origins_allowed
     @cache.cached(timeout=60, query_string=True)
-    def get(user_authenticated):
+    def get():
         page, per_page, offset = get_page_args()
 
         logs = repository_service_log.get_all()
@@ -87,9 +94,8 @@ class LogsServicesResource(Resource):
 class LogsRequestsResource(Resource):
 
     @staticmethod
-    @token_provider.verify_token
-    @token_provider.admin_required
-    def get(user_authenticated):
+    @cors_provider.origins_allowed
+    def get():
         page, per_page, offset = get_page_args()
 
         logs = repository_request_log.get_all()

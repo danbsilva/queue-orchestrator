@@ -34,9 +34,6 @@ CACHE_DEFAULT_TIMEOUT = config_env('CACHE_DEFAULT_TIMEOUT')
 # KAFKA
 KAFKA_SERVER = config_env('KAFKA_SERVER')
 
-# TOPICS
-TOPIC_LOGS = config_env('TOPIC_LOGS')
-
 EXTENSIONS = [
     'src.routes:init_app',
     'src.extensions.flask_sqlalchemy:init_app',

@@ -7,7 +7,7 @@ main_app = app.create_app()
 
 
 # Thread to consumer topic SERVICES REGISTER
-Thread(target=kafka.kafka_consumer, args=(main_app, 'SERVICES_REGISTER', callbacks.service_register,)).start()
+Thread(target=kafka.kafka_consumer, args=(main_app, config_env("TOPIC_SERVICES_REGISTER"), callbacks.service_register,)).start()
 
 
 if __name__ == '__main__':

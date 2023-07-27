@@ -11,8 +11,11 @@ register.register_service(app=main_app)
 
 # Threads to consumer topics and send email validation to user register
 threads.start_thread(target=kafka.kafka_consumer,
-                     args=(main_app, config_env('TOPIC_SEND_EMAIL_VALIDATION'), callbacks.send_mail,))
+                     args=(main_app, config_env('TOPIC_SEND_EMAIL_VALIDATION_ACCOUNT'), callbacks.send_mail,))
 
+# Threads to consumer topics and send email recovery password to user
+threads.start_thread(target=kafka.kafka_consumer,
+                     args=(main_app, config_env('TOPIC_SEND_EMAIL_RECOVERY_PASSWORD'), callbacks.send_mail,))
 
 if __name__ == '__main__':
 

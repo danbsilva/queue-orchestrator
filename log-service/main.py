@@ -10,10 +10,10 @@ main_app = app.create_app()
 register.register_service(app=main_app)
 
 # Thread to consumer topic SERVICES LOGS
-Thread(target=kafka.kafka_consumer, args=(main_app, 'SERVICES_LOGS', callbacks.save_service_log,)).start()
+Thread(target=kafka.kafka_consumer, args=(main_app, config_env('TOPIC_SERVICES_LOGS'), callbacks.save_service_log,)).start()
 
 # Thread to consumer topic REQUESTS LOGS
-Thread(target=kafka.kafka_consumer, args=(main_app, 'REQUESTS_LOGS', callbacks.save_request_log,)).start()
+Thread(target=kafka.kafka_consumer, args=(main_app, config_env('TOPIC_REQUESTS_LOGS'), callbacks.save_request_log,)).start()
 
 
 if __name__ == '__main__':

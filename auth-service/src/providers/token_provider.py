@@ -21,7 +21,7 @@ def create_token(payload):
     token = jwt.encode(payload, config_env('SECRET_KEY'), algorithm=config_env('ALGORITHM'))
     if not token:
         logging.send_log_kafka('INFO', __module_name__, 'create_token',
-                               'Error token generate')
+                                 messages.ERR_TOKEN_GENERATE)
         return {'message': messages.ERR_TOKEN_GENERATE}, 400
 
     return token
@@ -34,12 +34,12 @@ def verify_token(f):
             token = request.headers['Authorization']
         except KeyError:
             logging.send_log_kafka('INFO', __module_name__, 'verify_token',
-                                   'Token is missing')
+                                   messages.TOKEN_IS_MISSING)
             return {'message': messages.TOKEN_IS_MISSING}, 401
 
         if not token.startswith('Bearer '):
             logging.send_log_kafka('INFO', __module_name__, 'verify_token',
-                                   'Token used is invalid format')
+                                   messages.INVALID_TOKEN_FORMAT)
             return {'message': messages.INVALID_TOKEN_FORMAT}, 401
 
         token = token.replace('Bearer ', '')
@@ -47,7 +47,7 @@ def verify_token(f):
         cache_token = cache.get(f'BLACKLIST_TOKEN_{token}')
         if cache_token:
             logging.send_log_kafka('INFO', __module_name__, 'verify_token',
-                                   'Token used is blacklist')
+                                   messages.TOKEN_IS_INVALID)
             return {"message": messages.TOKEN_IS_INVALID}, 401
 
         try:
@@ -55,11 +55,11 @@ def verify_token(f):
             user_db = models.User.query.filter_by(uuid=user_authenticated['uuid']).first()
             if not user_db:
                 logging.send_log_kafka('INFO', __module_name__, 'verify_token',
-                                       'Token used is unauthorized')
+                                        messages.UNAUTHORIZED_USER)
                 return {'message': messages.UNAUTHORIZED_USER}, 401
-        except Exception:
+        except jwt.InvalidTokenError:
             logging.send_log_kafka('INFO', __module_name__, 'verify_token',
-                                   'Token used is invalid')
+                                   messages.TOKEN_IS_INVALID)
             return {'message': messages.TOKEN_IS_INVALID}, 401
 
         return f(user_authenticated, *args, **kwargs)
@@ -73,7 +73,7 @@ def verify_token_email(token):
                                         algorithms=[config_env('ALGORITHM')])
     except jwt.InvalidTokenError:
         logging.send_log_kafka('INFO', __module_name__, 'verify_token_email',
-                               'Token used is invalid')
+                               messages.TOKEN_IS_INVALID)
         return {'message': messages.TOKEN_IS_INVALID}, 401
 
     return user_authenticated
@@ -82,10 +82,15 @@ def verify_token_email(token):
 def admin_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-
-        if not args[0]['is_admin']:
+        user_authenticated = args[0]
+        user_db = models.User.query.filter_by(uuid=user_authenticated['uuid']).first()
+        if not user_db:
             logging.send_log_kafka('INFO', __module_name__, 'admin_required',
-                                   'User unauthorized')
+                                    messages.UNAUTHORIZED_USER)
+            return {'message': messages.UNAUTHORIZED_USER}, 401
+        if not user_db.is_admin:
+            logging.send_log_kafka('INFO', __module_name__, 'admin_required',
+                                    messages.UNAUTHORIZED_USER)
             return {'message': messages.UNAUTHORIZED_USER}, 401
 
         return f(*args, **kwargs)

@@ -132,7 +132,7 @@ services:
 
   gateway:
     build:
-      context: ./api-gateway
+      context: gateway
       dockerfile: Dockerfile
     container_name: gateway
     environment:
@@ -142,7 +142,7 @@ services:
     expose:
       - "2000"
     volumes:
-      - ./api-gateway/:/app/
+      - ./gateway/:/app/
     depends_on:
       gateway-db:
         condition: service_healthy

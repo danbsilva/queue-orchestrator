@@ -16,7 +16,7 @@ def register_service(app):
             'routes': routes
         }
 
-        Thread(target=kafka.kafka_producer, args=('SERVICES_REGISTER', app.name, data, )).start()
+        Thread(target=kafka.kafka_producer, args=(config_env('TOPIC_SERVICES_REGISTER'), app.name, data, )).start()
 
 
 def register_routes(app):
@@ -26,13 +26,18 @@ def register_routes(app):
         endpoint = route['path']
         args = route['args'] if route['args'] else ''
         methods_allowed = route['methods']
-        requires_auth = True
+
+        if 'login' in endpoint or 'validate-email' in endpoint or 'forgot-password' in endpoint \
+                or 'reset-password' in endpoint or 'send-email-validation' in endpoint:
+            required_auth = False
+        else:
+            required_auth = True
 
         data = {
             'route': endpoint,
             'args': args,
             'methods_allowed': methods_allowed,
-            'required_auth': requires_auth
+            'required_auth': required_auth,
         }
         routes_list.append(data)
 

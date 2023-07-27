@@ -17,6 +17,8 @@ class UserGetSchema(Schema):
     name = fields.String()
     username = fields.String()
     email = fields.Email()
+    email_sent = fields.Bool()
+    email_valid = fields.Bool()
     is_admin = fields.Bool()
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
@@ -52,13 +54,12 @@ class UserChangePasswordSchema(Schema):
                              validate=validate.Length(min=6, max=12, error=messages.FIELD_BETWEEN_6_AND_12))
 
 
+class ForgotPasswordSchema(Schema):
+    email = fields.Email(required=True,
+                         error_messages={'required': messages.FIELD_IS_REQUIRED,
+                                         'invalid': messages.FIELD_IS_EMAIL_INVALID})
+
 class UserSendEmailValidationSchema(Schema):
     email = fields.Email(required=True,
                          error_messages={'required': messages.FIELD_IS_REQUIRED,
                                          'invalid': messages.FIELD_IS_EMAIL_INVALID})
-    subject = fields.String(required=True,
-                            error_messages={'required': messages.FIELD_IS_REQUIRED})
-    url_redirect_success = fields.String(required=True,
-                                error_messages={'required': messages.FIELD_IS_REQUIRED})
-    url_redirect_fail = fields.String(required=True,
-                                error_messages={'required': messages.FIELD_IS_REQUIRED})

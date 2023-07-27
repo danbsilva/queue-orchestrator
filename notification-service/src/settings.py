@@ -25,9 +25,6 @@ MAIL_DEFAULT_SENDER = config_env('MAIL_DEFAULT_SENDER')
 # KAFKA
 KAFKA_SERVER = config_env('KAFKA_SERVER')
 
-# TOPICS
-TOPIC_SEND_EMAIL_VALIDATION = config_env('TOPIC_SEND_EMAIL_VALIDATION')
-
 EXTENSIONS = [
     'src.extensions.mail:init_app'
 ]

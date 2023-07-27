@@ -16,5 +16,5 @@ def send_log_kafka(level, module_name, function_name, message):
            'function_name': function_name,
            'message': message}
 
-    Thread(target=kafka.kafka_producer, args=('SERVICES_LOGS', config_env('APP_NAME'), log,)).start()
+    Thread(target=kafka.kafka_producer, args=(config_env('TOPIC_SERVICES_LOGS'), config_env('APP_NAME'), log,)).start()
 
