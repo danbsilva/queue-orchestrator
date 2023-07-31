@@ -62,33 +62,12 @@ docker-compose up -d
 - **notifications**: responsible for managing the notifications service
 
 
-# Usage
+# Documentation (Swagger)
+<p align="justify">The API Gateway has the following documentation:</p>
 
-## Gateway
-<p align="justify">The API Gateway is responsible for managing the requests of the users. The requests are sent to the API Gateway and it redirects the request to the correct service.</p>
-
-### Endpoints
-<p align="justify">The API Gateway has the following endpoints:</p>
-
-#### POST /auth/login
-
-
-##### Request
-```json
-{
-    "email": "admin@admin.com",
-    "password": "admin"
-}
+```url
+http://localhost:2000/api/docs/
 ```
-
-#### Response
-```json
-{
-    "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
-}
-```
-
-<p align="justify">The token must be sent in the header of the requests to the other endpoints.</p>
 
 
 

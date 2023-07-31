@@ -35,6 +35,9 @@ class AutomationGetSchema(Schema):
 #### OWNERS ####
 class OwnerGetSchema(Schema):
     uuid = fields.String(required=True)
+    name = fields.String(required=True)
+    email = fields.String(required=True)
+
 
     class Meta:
         ordered = True

@@ -376,11 +376,12 @@ class ForwardRequestResource(Resource):
                 args = f'<{route.args}>' if route.args else ''
 
                 # patterns to validate the URL
+                pattern_id = r'[0-9]+'  # pattern to validate ID
                 pattern_uuid = r'[a-f0-9-]+'  # pattern to validate UUID
                 pattern_jwt = r'[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.[A-Za-z0-9-_.+/=]+'  # pattern to validate JWT
 
                 if args:  # if the route has arguments, the URL must be in the pattern
-                    pattern = endpoint.replace(args, f'({pattern_uuid}|{pattern_jwt})')
+                    pattern = endpoint.replace(args, f'({pattern_uuid}|{pattern_jwt} |{pattern_id})')
                 else:  # if the route has no arguments, the URL must be exactly the same
                     pattern = endpoint
 

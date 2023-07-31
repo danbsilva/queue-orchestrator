@@ -102,6 +102,22 @@ def verify_token():
         return messages.INTERNAL_SERVER_ERROR, 500
 
 
+def verify_user_exists(user_uuid):
+    try:
+        response = requests.request('GET', f'http://auth:80/auth/users/{user_uuid}/',
+                                    headers=request.headers)
+        if response.status_code != 200:
+            logging.send_log_kafka('INFO', __module_name__, 'verify_user_exists',
+                                   f'Error validating user: {response.text}')
+            return messages.UNAUTHORIZED, 401
+        return response.json(), 200
+
+    except Exception as e:
+        logging.send_log_kafka('INFO', __module_name__, 'verify_user_exists',
+                               f'Error validating user: {e}')
+        return messages.INTERNAL_SERVER_ERROR, 500
+
+
 class SwaggerResource(Resource):
     def get(self):
         return automations.doc_swagger
@@ -359,19 +375,24 @@ class OwnersByAutomationResource(Resource):
                                        f'Automation {automation_uuid} not found')
                 return {'message': messages.AUTOMATION_NOT_FOUND}, 404
 
-            onwers_add = []
-            onwers_not_add = []
+            owners_add = []
+            owners_not_add = []
             for owner in data['owners']:
-                if owner in automation.owners:
-                    logging.send_log_kafka('INFO', __module_name__, 'OwnersByAutomationResource.post',
-                                           f'Owner {owner} already exists in automation {automation.uuid}')
-
-                    onwers_not_add.append({'uuid': owner['uuid'], 'message': messages.OWNER_ALREADY_EXISTS})
-
+                response, code = verify_user_exists(owner['uuid'])
+                if code != 200:
+                    owners_not_add.append({'uuid': owner['uuid'], 'message': messages.USER_NOT_FOUND})
                 else:
-                    onwers_add.append(owner)
+                    user = response['user']
+                    if owner in automation.owners:
+                        logging.send_log_kafka('INFO', __module_name__, 'OwnersByAutomationResource.post',
+                                               f'Owner {owner} already exists in automation {automation.uuid}')
 
-            for owner in onwers_add:
+                        owners_not_add.append({'uuid': owner['uuid'], 'message': messages.OWNER_ALREADY_EXISTS})
+
+                    else:
+                        owners_add.append(user)
+
+            for owner in owners_add:
                 try:
                     repository_automation.add_owners(automation, owner)
                     logging.send_log_kafka('INFO', __module_name__, 'OwnersByAutomationResource.post',
@@ -381,11 +402,11 @@ class OwnersByAutomationResource(Resource):
                     logging.send_log_kafka('CRITICAL', __module_name__, 'OwnersByAutomationResource.post',
                                            f'Error adding owner {owner} to automation {automation.uuid}: {e}')
 
-                    onwers_not_add.append({'uuid': owner['uuid'], 'message': 'Error adding owner to automation'})
-                    onwers_add.remove(owner)
+                    owners_not_add.append({'uuid': owner['uuid'], 'message': 'Error adding owner to automation'})
+                    owners_add.remove(owner)
 
-            return {'owners_success': onwers_add,
-                    'owners_fail': onwers_not_add}, 200
+            return {'owners_success': owners_add,
+                    'owners_fail': owners_not_add}, 200
 
         except Exception as e:
             logging.send_log_kafka('CRITICAL', __module_name__, 'OwnersByAutomationResource.post', str(e))
@@ -438,19 +459,19 @@ class OwnersByAutomationResource(Resource):
                                        f'Automation {automation_uuid} not found')
                 return {'message': messages.AUTOMATION_NOT_FOUND}, 404
 
-            onwers_remove = []
-            onwers_not_remove = []
+            owners_remove = []
+            owners_not_remove = []
             for owner in data['owners']:
                 if owner not in automation.owners:
                     logging.send_log_kafka('INFO', __module_name__, 'OwnersByAutomationResource.delete',
                                            f'Owner {owner} not found in automation {automation.uuid}')
 
-                    onwers_not_remove.append({'uuid': owner['uuid'], 'message': messages.OWNER_NOT_FOUND})
+                    owners_not_remove.append({'uuid': owner['uuid'], 'message': messages.OWNER_NOT_FOUND})
 
                 else:
-                    onwers_remove.append(owner)
+                    owners_remove.append(owner)
 
-            for owner in onwers_remove:
+            for owner in owners_remove:
                 try:
                     repository_automation.remove_owners(automation, owner)
                     logging.send_log_kafka('INFO', __module_name__, 'OwnersByAutomationResource.delete',
@@ -459,11 +480,11 @@ class OwnersByAutomationResource(Resource):
                     logging.send_log_kafka('CRITICAL', __module_name__, 'OwnersByAutomationResource.delete',
                                            f'Error removing owner {owner} from automation {automation.uuid}: {e}')
 
-                    onwers_not_remove.append({'uuid': owner['uuid'], 'message': 'Error removing owner from automation'})
-                    onwers_remove.remove(owner)
+                    owners_not_remove.append({'uuid': owner['uuid'], 'message': 'Error removing owner from automation'})
+                    owners_remove.remove(owner)
 
-            return {'owners_success': onwers_remove,
-                    'owners_fail': onwers_not_remove}, 200
+            return {'owners_success': owners_remove,
+                    'owners_fail': owners_not_remove}, 200
 
         except Exception as e:
             logging.send_log_kafka('CRITICAL', __module_name__, 'OwnerByAutomationResource.delete', str(e))

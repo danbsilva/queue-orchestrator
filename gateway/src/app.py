@@ -4,7 +4,7 @@ from datetime import datetime
 from threading import Thread
 from decouple import config as config_env
 
-from flask import Flask, request
+from flask import Flask, request, redirect
 from src import config, kafka
 import uuid
 
@@ -20,6 +20,10 @@ def minimal_app():
 
 def create_app():
     app = minimal_app()
+
+    @app.route('/', methods=['GET'])
+    def index():
+        return redirect('/api/docs')
 
     @app.route('/health/', methods=['GET'])
     def health():
