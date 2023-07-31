@@ -12,7 +12,7 @@ def create(new_service):
 
 
 def get_all():
-    return models.Service.query.all()
+    return models.Service.query.order_by(models.Service.service_name).all()
 
 
 def get_by_service_name(service_name):
@@ -21,6 +21,10 @@ def get_by_service_name(service_name):
 
 def get_by_uuid(uuid):
     return models.Service.query.filter_by(uuid=uuid).first()
+
+
+def get_by_id(id):
+    return models.Service.query.filter_by(id=id).first()
 
 
 def update(service, new_service):

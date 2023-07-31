@@ -1,10 +1,14 @@
 import json
 from decouple import config as config_env
 from time import sleep
+from src import logging
 
 from kafka import KafkaProducer, KafkaConsumer
 from kafka.errors import KafkaError
 from kafka.admin import KafkaAdminClient, NewTopic
+
+
+__module_name__ = 'src.kafka'
 
 
 def is_broker_available():
@@ -21,23 +25,31 @@ def wait_for_broker():
 
 
 def create_topic(topic_name, num_partitions, replication_factor):
-    admin_client = KafkaAdminClient(bootstrap_servers=config_env('KAFKA_SERVER'))
+    try:
+        admin_client = KafkaAdminClient(bootstrap_servers=config_env('KAFKA_SERVER'))
 
-    topic = NewTopic(name=topic_name, num_partitions=num_partitions, replication_factor=replication_factor)
+        topic = NewTopic(name=topic_name, num_partitions=num_partitions, replication_factor=replication_factor)
 
-    # Create topic
-    admin_client.create_topics([topic])
-
-    print(f"Topic {topic_name} created")
+        # Create topic
+        admin_client.create_topics([topic])
+        logging.send_log_kafka('INFO', __module_name__, 'create_topic',
+                               f'Topic {topic_name} created')
+    except KafkaError as e:
+        logging.send_log_kafka('INFO', __module_name__, 'create_topic',
+                                 f'Error creating topic {topic_name}: {str(e)}')
 
 
 def delete_topic(topic_name):
-    admin_client = KafkaAdminClient(bootstrap_servers=config_env('KAFKA_SERVER'))
+    try:
+        admin_client = KafkaAdminClient(bootstrap_servers=config_env('KAFKA_SERVER'))
 
-    # Delete topic
-    admin_client.delete_topics([topic_name])
-
-    print(f"Topic {topic_name} deleted")
+        # Delete topic
+        admin_client.delete_topics([topic_name])
+        logging.send_log_kafka('INFO', __module_name__, 'delete_topic',
+                               f'Topic {topic_name} deleted')
+    except KafkaError as e:
+        logging.send_log_kafka('INFO', __module_name__, 'delete_topic',
+                               f'Erorr deleting topic {topic_name}: {str(e)}')
 
 
 def kafka_producer(topic, key, value):
@@ -49,7 +61,8 @@ def kafka_producer(topic, key, value):
         producer.flush()
         producer.close()
     except KafkaError as e:
-        print(f'Error producing message: {str(e)}')
+        logging.send_log_kafka('ERROR', __module_name__, 'kafka_producer',
+                                 f'Error sending message to topic {topic}: {str(e)}')
 
 
 def kafka_consumer(app, topic, callback):
@@ -68,4 +81,5 @@ def kafka_consumer(app, topic, callback):
             callback(app, key, msg)
 
     except KafkaError as e:
-        print(f'Error consuming message: {str(e)}')
+        logging.send_log_kafka('ERROR', __module_name__, 'kafka_consumer',
+                                 f'Error consuming message from topic {topic}: {str(e)}')

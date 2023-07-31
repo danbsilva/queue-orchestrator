@@ -12,7 +12,7 @@ settings = os.path.join(os.path.dirname(__file__), 'settings.py')
 
 
 def minimal_app():
-    app = Flask(config_env('APP_NAME'))
+    app = Flask(__name__)
     app.config.from_pyfile(settings)
     config.init_app(app=app)
     return app

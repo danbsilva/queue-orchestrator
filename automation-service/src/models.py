@@ -12,7 +12,7 @@ class Automation(db.Model):
     name = db.Column(db.String, nullable=False)
     acronym = db.Column(db.String, nullable=False, unique=True)
     description = db.Column(db.String, nullable=False)
-    owners = db.Column(db.JSON, nullable=True)
+    owners = db.Column(db.JSON, nullable=True, default=[])
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     steps = db.relationship('AutomationStep', back_populates='automation')
@@ -28,6 +28,7 @@ class Automation(db.Model):
             'name': self.name,
             'acronym': self.acronym,
             'description': self.description,
+            'owners': self.owners
         }
 
 
@@ -58,6 +59,8 @@ class AutomationStep(db.Model):
             'name': self.name,
             'description': self.description,
             'step': self.step,
+            'topic': self.topic,
+            'try_count': self.try_count
         }
 
 
@@ -86,11 +89,8 @@ class AutomationItem(db.Model):
             'automation_id': self.automation_id,
             'automation_step_id': self.automation_step_id,
             'data': self.data,
-            'status': self.status,
-            'created_at': self.created_at,
-            'updated_at': self.updated_at
+            'status': self.status
         }
-
 
 class AutomationItemHistory(db.Model):
     __tablename__ = 'automation_item_history'

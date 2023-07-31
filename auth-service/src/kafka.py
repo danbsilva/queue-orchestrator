@@ -1,9 +1,11 @@
 import json
 from decouple import config as config_env
+from src import logging
 
 from kafka import KafkaProducer
 from kafka.errors import KafkaError
 
+__module_name__ = 'src.kafka'
 
 def kafka_producer(topic, key, value):
 
@@ -14,4 +16,5 @@ def kafka_producer(topic, key, value):
         producer.flush()
         producer.close()
     except KafkaError as e:
-        print(f'Error sending message to kafka: {e}')
+        logging.send_log_kafka('INFO', __module_name__, 'kafka_producer',
+                               f'Error on send message to kafka: {e}')

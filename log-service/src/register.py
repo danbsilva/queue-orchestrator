@@ -2,7 +2,22 @@ from decouple import config as config_env
 from threading import Thread
 
 from src import kafka
+from src.docs import logs
 
+def filter_endpoint(endpoint_path, method, schema):
+    filtered_endpoints = list(filter(lambda x: x['endpoint'] == endpoint_path, logs.docs_endpoints))
+
+    if filtered_endpoints:
+        endpoint_info = filtered_endpoints[0]
+        method_info = list(filter(lambda x: method in x.keys(), endpoint_info['methods']))
+        if method_info:
+            method_info = method_info[0][method]
+            schema_model = method_info.get(schema, {})
+            return schema_model
+        else:
+            return {}
+    else:
+        return {}
 
 def register_service(app):
     with app.app_context():
@@ -51,12 +66,35 @@ def extract_routes(app):
         methods = rule.methods
         endpoint = app.view_functions[rule.endpoint]
         methods = [method for method in methods if method != 'OPTIONS' and method != 'HEAD' and method != 'TRACE']
+        doc = []
+        for method in methods:
+            method_doc = {}
+
+            if method == 'GET':
+                response = filter_endpoint(path, method, 'response')
+                method_doc = {"GET": {"response": response}}
+
+            elif method == 'POST':
+                request = filter_endpoint(path, method, 'request')
+                response = filter_endpoint(path, method, 'response')
+                method_doc = {"POST": {"request": request, "response": response}}
+
+            elif method == 'PATCH':
+                request = filter_endpoint(path, method, 'request')
+                response = filter_endpoint(path, method, 'response')
+                method_doc = {"PATCH": {"request": request, "response": response}}
+
+            elif method == 'DELETE':
+                response = filter_endpoint(path, method, 'response')
+                method_doc = {"DELETE": {"response": response}}
+
+            doc.append(method_doc)
 
         # Create the route
         route = {
             'path': path,
             'args': '{args}'.format(args='>'.join(rule.arguments)),
-            'methods': methods,
+            'methods': doc,
             'endpoint': endpoint.__name__,
         }
 

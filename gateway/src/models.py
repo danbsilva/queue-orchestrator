@@ -16,6 +16,7 @@ class Service(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     service_routes = db.relationship('ServiceRoutes', back_populates='service')
+    service_documentations = db.relationship('ServiceDocumentations', back_populates='service')
 
     def to_json(self):
         return {
@@ -55,6 +56,28 @@ class ServiceRoutes(db.Model):
             'methods_allowed': self.methods_allowed,
             'required_auth': self.required_auth,
             'required_admin': self.required_admin,
+            'created_at': self.created_at,
+            'updated_at': self.updated_at,
+        }
+
+
+class ServiceDocumentations(db.Model):
+
+    __tablename__ = 'service_documentations'
+
+    id = db.Column(db.Integer, primary_key=True)
+    uuid = db.Column(db.String, nullable=False, default=lambda: str(uuid4()))
+    service_id = db.Column(db.Integer, db.ForeignKey('services.id'), nullable=False)
+    service = db.relationship('Service', back_populates='service_documentations')
+    swagger = db.Column(db.JSON, nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def to_json(self):
+        return {
+            'uuid': self.uuid,
+            'service_id': self.service_id,
+            'swagger': self.swagger,
             'created_at': self.created_at,
             'updated_at': self.updated_at,
         }

@@ -1,5 +1,5 @@
+import os
 import time
-import uuid
 from datetime import datetime
 from decouple import config as config_env
 from threading import Thread
@@ -8,9 +8,12 @@ from flask import Flask, request
 from src import config, kafka
 from src import admin
 
+
+settings = os.path.join(os.path.dirname(__file__), 'settings.py')
+
 def minimal_app():
     app = Flask(config_env('APP_NAME'))
-    app.config.from_pyfile('src/settings.py')
+    app.config.from_pyfile(settings)
     config.init_app(app=app)
     return app
 

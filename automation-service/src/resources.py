@@ -15,6 +15,8 @@ from src import repository_automation, repository_automation_step, repository_au
 from src import messages
 from src.providers import cors_provider
 from werkzeug.exceptions import UnsupportedMediaType
+from src.docs import automations
+import requests
 
 
 __module_name__ = 'src.resources'
@@ -84,6 +86,27 @@ def add_transaction_id_to_message():
     return json_transaction_id
 
 
+def verify_token():
+    try:
+        response = requests.request('GET', 'http://auth:80/auth/validate/token/',
+                                    headers=request.headers)
+        if response.status_code != 200:
+            logging.send_log_kafka('INFO', __module_name__, 'verify_token',
+                                   f'Error validating token: {response.text}')
+            return messages.UNAUTHORIZED, 401
+        return response.json(), 200
+
+    except Exception as e:
+        logging.send_log_kafka('INFO', __module_name__, 'verify_token',
+                               f'Error validating token: {e}')
+        return messages.INTERNAL_SERVER_ERROR, 500
+
+
+class SwaggerResource(Resource):
+    def get(self):
+        return automations.doc_swagger
+
+
 # AUTOMATIONS ##
 class AutomationsResource(Resource):
     @staticmethod
@@ -127,7 +150,7 @@ class AutomationsResource(Resource):
             except Exception as e:
                 logging.send_log_kafka('CRITICAL', __module_name__, 'AutomationsResource.post',
                                        f'Error creating automation: {e}')
-                return {'message': messages.INTERNAL_SERVER_ERROR}, 500
+                return {'message': 'Error creating automation'}, 400
 
             schema_automation = schemas.AutomationGetSchema()
             schema_data = schema_automation.dump(automation)
@@ -227,7 +250,7 @@ class AutomationResource(Resource):
             except Exception as e:
                 logging.send_log_kafka('CRITICAL', __module_name__, 'AutomationResource.patch',
                                        f'Error updating automation: {e}')
-                return {'message': messages.INTERNAL_SERVER_ERROR}, 500
+                return {'message': 'Error updating automation'}, 400
 
             schema_automation = schemas.AutomationGetSchema()
             schema_data = schema_automation.dump(automation)
@@ -254,7 +277,7 @@ class AutomationResource(Resource):
             except Exception as e:
                 logging.send_log_kafka('CRITICAL', __module_name__, 'AutomationResource.delete',
                                        f'Error deleting automation: {e}')
-                return {'message': messages.INTERNAL_SERVER_ERROR}, 500
+                return {'message': 'Error deleting automation'}, 400
 
             return {'message': messages.AUTOMATION_DELETED}, 200
 
@@ -266,12 +289,18 @@ class AutomationResource(Resource):
 class AutomationMeResource(Resource):
     @staticmethod
     @cors_provider.origins_allowed
-    @cache.cached(timeout=60, query_string=True)
-    def get(user_uuid):
+    def get():
         try:
             page, per_page, offset = get_page_args()
 
+            message, status_code = verify_token()
+            if status_code != 200:
+                return {'message': message}, status_code
+
+            user_uuid = message['user']['uuid']
+
             automations = repository_automation.get_by_owner(owner_uuid=user_uuid)
+
             if not automations:
                 logging.send_log_kafka('INFO', __module_name__, 'AutomationMeResource.get',
                                        f'Automations not found for user {user_uuid}')
@@ -285,7 +314,8 @@ class AutomationMeResource(Resource):
 
             logging.send_log_kafka('INFO', __module_name__, 'AutomationMeResource.get',
                                    f'{str(len(pagination_automations))} automations found for user {user_uuid}')
-            return {'automations': schema_data,
+
+            return  {'automations': schema_data,
                     'pagination': {
                         'total_pages': pagination.total_pages,
                         'current_page': page,
@@ -303,6 +333,64 @@ class AutomationMeResource(Resource):
 
 
 class OwnersByAutomationResource(Resource):
+
+    @staticmethod
+    @cors_provider.origins_allowed
+    def post(automation_uuid):
+        try:
+            try:
+                data = request.get_json()
+            except UnsupportedMediaType as e:
+                logging.send_log_kafka('INFO', __module_name__, 'OwnersByAutomationResource.post', str(e))
+                return {'message': messages.UNSUPPORTED_MEDIA_TYPE}, 415
+            except Exception as e:
+                logging.send_log_kafka('INFO', __module_name__, 'OwnersByAutomationResource.post', str(e))
+                return {'message': messages.BAD_REQUEST}, 400
+
+            schema_validate = validate_schema(schemas.OwnersPostSchema(), data)
+            if schema_validate:
+                logging.send_log_kafka('INFO', __module_name__, 'OwnersByAutomationResource.post',
+                                       f'Schema validation error: {schema_validate}')
+                return {'message': schema_validate}, 400
+
+            automation = repository_automation.get_by_uuid(uuid=automation_uuid)
+            if not automation:
+                logging.send_log_kafka('INFO', __module_name__, 'OwnersByAutomationResource.post',
+                                       f'Automation {automation_uuid} not found')
+                return {'message': messages.AUTOMATION_NOT_FOUND}, 404
+
+            onwers_add = []
+            onwers_not_add = []
+            for owner in data['owners']:
+                if owner in automation.owners:
+                    logging.send_log_kafka('INFO', __module_name__, 'OwnersByAutomationResource.post',
+                                           f'Owner {owner} already exists in automation {automation.uuid}')
+
+                    onwers_not_add.append({'uuid': owner['uuid'], 'message': messages.OWNER_ALREADY_EXISTS})
+
+                else:
+                    onwers_add.append(owner)
+
+            for owner in onwers_add:
+                try:
+                    repository_automation.add_owners(automation, owner)
+                    logging.send_log_kafka('INFO', __module_name__, 'OwnersByAutomationResource.post',
+                                            f'Owner {owner} added to automation {automation.uuid}')
+
+                except Exception as e:
+                    logging.send_log_kafka('CRITICAL', __module_name__, 'OwnersByAutomationResource.post',
+                                           f'Error adding owner {owner} to automation {automation.uuid}: {e}')
+
+                    onwers_not_add.append({'uuid': owner['uuid'], 'message': 'Error adding owner to automation'})
+                    onwers_add.remove(owner)
+
+            return {'owners_success': onwers_add,
+                    'owners_fail': onwers_not_add}, 200
+
+        except Exception as e:
+            logging.send_log_kafka('CRITICAL', __module_name__, 'OwnersByAutomationResource.post', str(e))
+            return {'message': messages.INTERNAL_SERVER_ERROR}, 500
+
     @staticmethod
     @cors_provider.origins_allowed
     @cache.cached(timeout=60, query_string=True)
@@ -323,6 +411,62 @@ class OwnersByAutomationResource(Resource):
 
         except Exception as e:
             logging.send_log_kafka('CRITICAL', __module_name__, 'OwnersByAutomationResource.get', str(e))
+            return {'message': messages.INTERNAL_SERVER_ERROR}, 500
+
+    @staticmethod
+    @cors_provider.origins_allowed
+    def delete(automation_uuid):
+        try:
+            try:
+                data = request.get_json()
+            except UnsupportedMediaType as e:
+                logging.send_log_kafka('INFO', __module_name__, 'OwnersByAutomationResource.delete', str(e))
+                return {'message': messages.UNSUPPORTED_MEDIA_TYPE}, 415
+            except Exception as e:
+                logging.send_log_kafka('INFO', __module_name__, 'OwnersByAutomationResource.delete', str(e))
+                return {'message': messages.BAD_REQUEST}, 400
+
+            schema_validate = validate_schema(schemas.OwnersDeleteSchema(), data)
+            if schema_validate:
+                logging.send_log_kafka('INFO', __module_name__, 'OwnersByAutomationResource.delete',
+                                       f'Schema validation error: {schema_validate}')
+                return {'message': schema_validate}, 400
+
+            automation = repository_automation.get_by_uuid(uuid=automation_uuid)
+            if not automation:
+                logging.send_log_kafka('INFO', __module_name__, 'OwnerByAutomationResource.delete',
+                                       f'Automation {automation_uuid} not found')
+                return {'message': messages.AUTOMATION_NOT_FOUND}, 404
+
+            onwers_remove = []
+            onwers_not_remove = []
+            for owner in data['owners']:
+                if owner not in automation.owners:
+                    logging.send_log_kafka('INFO', __module_name__, 'OwnersByAutomationResource.delete',
+                                           f'Owner {owner} not found in automation {automation.uuid}')
+
+                    onwers_not_remove.append({'uuid': owner['uuid'], 'message': messages.OWNER_NOT_FOUND})
+
+                else:
+                    onwers_remove.append(owner)
+
+            for owner in onwers_remove:
+                try:
+                    repository_automation.remove_owners(automation, owner)
+                    logging.send_log_kafka('INFO', __module_name__, 'OwnersByAutomationResource.delete',
+                                            f'Owner {owner} removed from automation {automation.uuid}')
+                except Exception as e:
+                    logging.send_log_kafka('CRITICAL', __module_name__, 'OwnersByAutomationResource.delete',
+                                           f'Error removing owner {owner} from automation {automation.uuid}: {e}')
+
+                    onwers_not_remove.append({'uuid': owner['uuid'], 'message': 'Error removing owner from automation'})
+                    onwers_remove.remove(owner)
+
+            return {'owners_success': onwers_remove,
+                    'owners_fail': onwers_not_remove}, 200
+
+        except Exception as e:
+            logging.send_log_kafka('CRITICAL', __module_name__, 'OwnerByAutomationResource.delete', str(e))
             return {'message': messages.INTERNAL_SERVER_ERROR}, 500
 
 
@@ -377,7 +521,7 @@ class StepsResource(Resource):
             except Exception as e:
                 logging.send_log_kafka('CRITICAL', __module_name__, 'StepsResource.post',
                                        f'Error creating step: {e}')
-                return {'message': messages.INTERNAL_SERVER_ERROR}, 500
+                return {'message': 'Error creating step'}, 400
 
             kafka.create_topic(automation_step.topic, 1, 1)
 
@@ -485,7 +629,7 @@ class StepResource(Resource):
             except Exception as e:
                 logging.send_log_kafka('CRITICAL', __module_name__, 'StepResource.patch',
                                        f'Error updating step: {e}')
-                return {'message': messages.INTERNAL_SERVER_ERROR}, 500
+                return {'message': 'Error updating step'}, 400
 
             schema_automation_step = schemas.AutomationStepGetSchema()
             schema_data = schema_automation_step.dump(automation_step)
@@ -513,10 +657,9 @@ class StepResource(Resource):
             except Exception as e:
                 logging.send_log_kafka('CRITICAL', __module_name__, 'StepResource.delete',
                                        f'Error deleting step: {e}')
-                return {'message': messages.INTERNAL_SERVER_ERROR}, 500
+                return {'message': 'Error deleting step'}, 400
 
             kafka.delete_topic(automation_step.topic)
-
             return {'message': messages.STEP_DELETED}, 200
 
         except Exception as e:
@@ -551,14 +694,14 @@ class ItemsByAutomationResource(Resource):
                                        f'Automation {automation_uuid} not found')
                 return {'message': messages.AUTOMATION_NOT_FOUND}, 404
 
+            # Get steps
             steps = return_steps(automation)
+            # Get current step
             current_step = repository_automation_step.get_step_by_automation_id(automation.id, 1)
-
+            # Get try_count
             try_count = return_try_count(current_step)
-
+            # Get transaction_id
             transaction_id = add_transaction_id_to_message()
-
-            data['status'] = 'Pending'
 
             try:
                 automation_item = repository_automation_item.create(automation, current_step, data)
@@ -567,7 +710,7 @@ class ItemsByAutomationResource(Resource):
             except Exception as e:
                 logging.send_log_kafka('CRITICAL', __module_name__, 'ItemsByAutomationResource.post',
                                        f'Error creating item: {e}')
-                return {'message': messages.INTERNAL_SERVER_ERROR}, 500
+                return {'message':'Error creating item'}, 400
 
             try:
                 repository_automation_item_history.create(automation_item=automation_item, description=messages.ITEM_CREATED)
@@ -578,9 +721,9 @@ class ItemsByAutomationResource(Resource):
             schema_automation_step_item = schemas.AutomationItemGetSchema()
             schema_data = schema_automation_step_item.dump(automation_item)
 
-            schema_data.update(steps)
-            schema_data.update(try_count)
-            schema_data.update(transaction_id)
+            schema_data.update(steps)  # Add steps to response
+            schema_data.update(try_count)  # Add try_count to response
+            schema_data.update(transaction_id)  # Add transaction_id to response
 
             Thread(target=kafka.kafka_producer, args=(current_step.topic, automation_item.uuid, schema_data,)).start()
             logging.send_log_kafka('INFO', __module_name__, 'ItemsByAutomationResource.post',
@@ -593,6 +736,7 @@ class ItemsByAutomationResource(Resource):
                 logging.send_log_kafka('CRITICAL', __module_name__, 'ItemsByAutomationResource.post',
                                        f'Error creating history: {e}')
 
+            del schema_data['transaction_id']  # Remove transaction_id from response
             return {'item': schema_data}, 201
 
         except Exception as e:
@@ -612,12 +756,12 @@ class ItemsByAutomationResource(Resource):
                                        f'Automation {automation_uuid} not found')
                 return {'message': messages.AUTOMATION_NOT_FOUND}, 404
 
-            automation_step_items = repository_automation_item.get_all_by_automation_id(automation_id=automation.id)
+            items = repository_automation_item.get_all_by_automation_id(automation_id=automation.id)
 
-            pagination_items = automation_step_items[offset: offset + per_page]
-            pagination = Pagination(page=page, per_page=per_page, total=len(automation_step_items))
+            pagination_items = items[offset: offset + per_page]
+            pagination = Pagination(page=page, per_page=per_page, total=len(items))
 
-            schema_automation_step_item = schemas.AutomationStepItemGetSchema(many=True)
+            schema_automation_step_item = schemas.AutomationItemWithoutStepsGetSchema(many=True)
             schema_data = schema_automation_step_item.dump(pagination_items)
 
             logging.send_log_kafka('INFO', __module_name__, 'ItemsByAutomationResource.get',
@@ -645,21 +789,96 @@ class ItemResource(Resource):
     @cache.cached(timeout=60, query_string=True)
     def get(item_uuid):
         try:
-            automation_step_item = repository_automation_item.get_by_uuid(uuid=item_uuid)
-            if not automation_step_item:
+            item = repository_automation_item.get_by_uuid(uuid=item_uuid)
+            if not item:
                 logging.send_log_kafka('INFO', __module_name__, 'ItemResource.get',
                                        f'Item {item_uuid} not found')
                 return {'message': messages.ITEM_NOT_FOUND}, 404
 
-            schema_automation_step_item = schemas.AutomationStepItemGetSchema()
-            schema_data = schema_automation_step_item.dump(automation_step_item)
+            automation = repository_automation.get_by_id(id=item.automation_id)
+            step = repository_automation_step.get_by_id(id=item.automation_step_id)
+
+            # Get steps
+            steps = return_steps(automation, step)
+            # Get current step
+            current_step = repository_automation_step.get_step_by_automation_id(automation.id, step.step)
+            # Get try_count
+            try_count = return_try_count(current_step)
+            # Get transaction_id
+            transaction_id = add_transaction_id_to_message()
+
+            schema_automation_step_item = schemas.AutomationItemGetSchema()
+            schema_data = schema_automation_step_item.dump(item)
+
+            schema_data.update(steps)  # Add steps to response
+            schema_data.update(try_count)  # Add try_count to response
+            schema_data.update(transaction_id)  # Add transaction_id to response
 
             logging.send_log_kafka('INFO', __module_name__, 'ItemResource.get',
                                    f'Item {schema_data["uuid"]} found')
+
+            del schema_data['transaction_id']  # Remove transaction_id from response
             return {'item': schema_data}, 200
 
         except Exception as e:
             logging.send_log_kafka('CRITICAL', __module_name__, 'ItemResource.get', str(e))
+            return {'message': messages.INTERNAL_SERVER_ERROR}, 500
+
+
+class ItemUpdateStatusResource(Resource):
+    @staticmethod
+    @cors_provider.origins_allowed
+    def patch(item_uuid):
+        try:
+            try:
+                data = request.get_json()
+            except UnsupportedMediaType as e:
+                logging.send_log_kafka('INFO', __module_name__, 'ItemUpdateStatusResource.patch', str(e))
+                return {'message': messages.UNSUPPORTED_MEDIA_TYPE}, 415
+            except Exception as e:
+                logging.send_log_kafka('INFO', __module_name__, 'ItemUpdateStatusResource.patch', str(e))
+                return {'message': messages.BAD_REQUEST}, 400
+
+            schema_validate = validate_schema(schemas.AutomationItemUpdateStatusPatchSchema(), data)
+            if schema_validate:
+                logging.send_log_kafka('INFO', __module_name__, 'ItemUpdateStatusResource.patch',
+                                       f'Schema validation error: {schema_validate}')
+                return {'message': schema_validate}, 400
+
+            item = repository_automation_item.get_by_uuid(uuid=item_uuid)
+            if not item:
+                logging.send_log_kafka('INFO', __module_name__, 'ItemUpdateStatusResource.patch',
+                                       f'Item {item_uuid} not found')
+                return {'message': messages.ITEM_NOT_FOUND}, 404
+
+            if item.status == data['status']:
+                logging.send_log_kafka('INFO', __module_name__, 'ItemUpdateStatusResource.patch',
+                                       f'Item {item_uuid} already with status {data["status"]}')
+                return {'message': messages.ITEM_ALREADY_WITH_STATUS}, 200
+
+            try:
+                item.status = data['status']
+                repository_automation_item.update_status(item)
+                logging.send_log_kafka('INFO', __module_name__, 'ItemUpdateStatusResource.patch',
+                                       f'Item {item_uuid} updated for status {data["status"]}')
+            except Exception as e:
+                logging.send_log_kafka('CRITICAL', __module_name__, 'ItemUpdateStatusResource.patch',
+                                       f'Error updating item {item_uuid}: {e}')
+                return {'message': messages.INTERNAL_SERVER_ERROR}, 500
+
+            try:
+                repository_automation_item_history.create(automation_item=item, description=f'Item {data["status"]}')
+            except Exception as e:
+                logging.send_log_kafka('CRITICAL', __module_name__, 'ItemUpdateStatusResource.patch',
+                                       f'Error creating history: {e}')
+
+            schema_item = schemas.AutomationItemGetSchema()
+            schema_data = schema_item.dump(item)
+
+            return {'item': schema_data}, 200
+
+        except Exception as e:
+            logging.send_log_kafka('CRITICAL', __module_name__, 'ItemUpdateStatusResource.patch', str(e))
             return {'message': messages.INTERNAL_SERVER_ERROR}, 500
 
 
@@ -695,14 +914,15 @@ class ItemsByStepResource(Resource):
                                        f'Automation {step.automation_id} not found')
                 return {'message': messages.AUTOMATION_NOT_FOUND}, 404
 
+            # Get steps
             steps = return_steps(automation, step)
+            # Get try_count
             current_step = repository_automation_step.get_step_by_automation_id(automation.id, step.step)
-
+            # Get try_count
             try_count = return_try_count(current_step)
-
+            # Get transaction_id
             transaction_id = add_transaction_id_to_message()
 
-            data['status'] = 'Pending'
             try:
                 automation_item = repository_automation_item.create(automation, current_step, data)
                 logging.send_log_kafka('INFO', __module_name__, 'ItemsByStepResource.post',
@@ -710,7 +930,7 @@ class ItemsByStepResource(Resource):
             except Exception as e:
                 logging.send_log_kafka('CRITICAL', __module_name__, 'ItemsByStepResource.post',
                                        f'Error creating item: {e}')
-                return {'message': messages.INTERNAL_SERVER_ERROR}, 500
+                return {'message': 'Error creating item'}, 400
 
             try:
                 repository_automation_item_history.create(automation_item=automation_item, description=messages.ITEM_CREATED)
@@ -758,7 +978,7 @@ class ItemsByStepResource(Resource):
             pagination_items = automation_step_items[offset: offset + per_page]
             pagination = Pagination(page=page, per_page=per_page, total=len(automation_step_items))
 
-            schema_automation_step_item = schemas.AutomationStepItemGetSchema(many=True)
+            schema_automation_step_item = schemas.AutomationItemGetSchema(many=True)
             schema_data = schema_automation_step_item.dump(pagination_items)
 
             logging.send_log_kafka('INFO', __module_name__, 'ItemsByStepResource.get',
@@ -777,83 +997,6 @@ class ItemsByStepResource(Resource):
 
         except Exception as e:
             logging.send_log_kafka('CRITICAL', __module_name__, 'ItemsByStepResource.get', str(e))
-            return {'message': messages.INTERNAL_SERVER_ERROR}, 500
-
-
-class ItemInProcessResource(Resource):
-    @staticmethod
-    @cors_provider.origins_allowed
-    def patch(item_uuid):
-        try:
-            item = repository_automation_item.get_by_uuid(uuid=item_uuid)
-            if not item:
-                logging.send_log_kafka('INFO', __module_name__, 'ItemInProcessResource.post',
-                                        f'Item {item_uuid} not found')
-                return {'message': messages.ITEM_NOT_FOUND}, 404
-
-            item.status = 'Running'
-            try:
-                repository_automation_item.update_status(item)
-                logging.send_log_kafka('INFO', __module_name__, 'ItemInProcessResource.post',
-                                         f'Item {item.uuid} is running')
-            except Exception as e:
-                logging.send_log_kafka('CRITICAL', __module_name__, 'ItemInProcessResource.post',
-                                       f'Error updating status by item: {e}')
-                return {'message': messages.INTERNAL_SERVER_ERROR}, 500
-
-            schema_item = schemas.AutomationItemGetSchema()
-            schema_data = schema_item.dump(item)
-
-            return {'item': schema_data}, 200
-
-        except Exception as e:
-            logging.send_log_kafka('CRITICAL', __module_name__, 'ItemInProcessResource.post',
-                                   str(e))
-            return {'message': messages.INTERNAL_SERVER_ERROR}, 500
-
-
-class ItemProcessedResource(Resource):
-    @staticmethod
-    @cors_provider.origins_allowed
-    def post(item_uuid):
-        try:
-            try:
-                data = request.get_json()
-            except UnsupportedMediaType as e:
-                logging.send_log_kafka('INFO', __module_name__, 'ItemProcessedResource.post', str(e))
-                return {'message': messages.UNSUPPORTED_MEDIA_TYPE}, 415
-            except Exception as e:
-                logging.send_log_kafka('INFO', __module_name__, 'ItemProcessedResource.post', str(e))
-                return {'message': messages.BAD_REQUEST}, 400
-
-            schema_validate = validate_schema(schemas.AutomationItemPostSchema(), data)
-            if schema_validate:
-                logging.send_log_kafka('INFO', __module_name__, 'ItemProcessedResource.post',
-                                       f'Schema validation error: {schema_validate}')
-                return {'message': schema_validate}, 400
-
-            item = repository_automation_item.get_by_uuid(uuid=item_uuid)
-            if not item:
-                logging.send_log_kafka('INFO', __module_name__, 'ItemProcessedResource.post',
-                                        f'Item {item_uuid} not found')
-                return {'message': messages.ITEM_NOT_FOUND}, 404
-
-
-
-            try:
-                repository_automation_item_history.create(automation_item=item, description=messages.ITEM_PROCESSED)
-            except Exception as e:
-                logging.send_log_kafka('CRITICAL', __module_name__, 'ItemProcessedResource.post',
-                                       f'Error creating history: {e}')
-
-            schema_item = schemas.AutomationItemGetSchema()
-            schema_data = schema_item.dump(item)
-
-            return {'item': schema_data}, 200
-
-        except Exception as e:
-            logging.send_log_kafka('CRITICAL', __module_name__, 'ItemProcessedResource.post',
-                                   str(e))
             return {'message': messages.INTERNAL_SERVER_ERROR}, 500
 
 

@@ -59,3 +59,13 @@ def validate_email(user):
     db.session.commit()
 
     return user
+
+def update_role(user):
+    if user.is_admin:
+        user.is_admin = False
+    else:
+        user.is_admin = True
+
+    db.session.commit()
+
+    return user

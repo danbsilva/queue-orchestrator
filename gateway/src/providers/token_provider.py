@@ -17,7 +17,7 @@ def token_required():
         return {'message': messages.SERVICE_AUTH_NOT_FOUND}, 404
 
     try:
-        request.headers['Authorization']
+        request.headers.get('Authorization')
     except KeyError:
         logging.send_log_kafka('INFO', __name__, 'token_required', messages.TOKEN_IS_MISSING)
         return {'message': messages.TOKEN_IS_MISSING}, 401
@@ -25,7 +25,7 @@ def token_required():
     headers = dict(request.headers)
     headers['X-TRANSACTION-ID'] = request.transaction_id
 
-    url = f'{auth.service_host}/{auth.service_name}/token/validate/'
+    url = f'{auth.service_host}/{auth.service_name}/validate/token/'
     try:
         response = requests.request(
             method='GET',
@@ -57,7 +57,7 @@ def admin_required():
     headers['X-TRANSACTION-ID'] = request.transaction_id
 
 
-    url = f'{auth.service_host}/{auth.service_name}/admin/validate/'
+    url = f'{auth.service_host}/{auth.service_name}/validate/admin/'
     try:
         response = requests.request(
             method='GET',

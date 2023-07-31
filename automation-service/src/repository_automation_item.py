@@ -41,3 +41,4 @@ def update(item, new_item):
 def update_status(item):
     db.session.commit()
     return item
+

@@ -9,6 +9,9 @@ class ServiceLogPostSchema(Schema):
     function_name = fields.Str(required=True, validate=validate.Length(min=1, max=100))
     message = fields.Str(required=True, validate=validate.Length(min=1, max=1000))
 
+    class Meta:
+        ordered = True
+
 
 class ServiceLogGetSchema(Schema):
     uuid = fields.Str(required=True)
@@ -20,6 +23,9 @@ class ServiceLogGetSchema(Schema):
     function_name = fields.Str(required=True)
     message = fields.Str(required=True)
 
+    class Meta:
+        ordered = True
+
 
 class RequestLogPostSchema(Schema):
     service = fields.Str(required=True, validate=validate.Length(min=1, max=100))
@@ -28,6 +34,9 @@ class RequestLogPostSchema(Schema):
     endpoint = fields.Str(required=True, validate=[validate.Length(min=1, max=15)])
     status = fields.Int(required=True, validate=validate.Range(min=1))
     duration = fields.Float(required=True, validate=validate.Range(min=1))
+
+    class Meta:
+        ordered = True
 
 
 class RequestLogGetSchema(Schema):
@@ -42,3 +51,5 @@ class RequestLogGetSchema(Schema):
     status = fields.Int(required=True)
     duration = fields.Float(required=True)
 
+    class Meta:
+        ordered = True

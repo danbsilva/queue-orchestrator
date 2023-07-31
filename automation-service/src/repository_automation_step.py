@@ -18,6 +18,9 @@ def get_all(automation):
     return models.AutomationStep.query.filter_by(automation_id=automation.id).order_by(models.AutomationStep.step).all()
 
 
+def get_by_id(id):
+    return models.AutomationStep.query.filter_by(id=id).first()
+
 def get_by_uuid(uuid):
     return models.AutomationStep.query.filter_by(uuid=uuid).first()
 

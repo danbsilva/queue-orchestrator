@@ -1,7 +1,9 @@
+import json
+
 from decouple import config as config_env
 from threading import Thread
 
-from flask import request
+from flask import request, Response, jsonify
 from flask_restful import Resource
 from marshmallow import ValidationError
 
@@ -15,6 +17,7 @@ from src import messages
 from src.providers import token_provider
 from src.providers import hash_provider
 from werkzeug.exceptions import UnsupportedMediaType
+from src.docs import auth
 
 
 __module_name__ = 'src.resources'
@@ -33,6 +36,10 @@ def validate_schema(schema, data):
         schema.load(data)
     except ValidationError as e:
         return e.messages
+
+class SwaggerResource(Resource):
+    def get(self):
+        return auth.doc_swagger
 
 
 class UsersResource(Resource):
@@ -66,8 +73,9 @@ class UsersResource(Resource):
                 logging.send_log_kafka('INFO', __module_name__, 'UsersResource.post',
                                        f'User {user.uuid} created successfully by {user_authenticated["uuid"]}')
             except Exception as e:
-                logging.send_log_kafka('CRITICAL', __module_name__, 'UsersResource.post', str(e))
-                return {'message': messages.INTERNAL_SERVER_ERROR}, 500
+                logging.send_log_kafka('CRITICAL', __module_name__, 'UsersResource.post',
+                                        f'Error creating user: {str(e)}')
+                return {'message': 'Error creating user'}, 400
 
             user_schema = schemas.UserGetSchema()
             user_data = user_schema.dump(user)
@@ -177,8 +185,9 @@ class UserResource(Resource):
                 logging.send_log_kafka('INFO', __module_name__, 'UserResource.patch',
                                        f'User {user_uuid} updated successfully by {user_authenticated["uuid"]}')
             except Exception as e:
-                logging.send_log_kafka('CRITICAL', __module_name__, 'UserResource.patch', str(e))
-                return {'message': messages.INTERNAL_SERVER_ERROR}, 500
+                logging.send_log_kafka('CRITICAL', __module_name__, 'UserResource.patch',
+                                        f'Error updating user: {str(e)}')
+                return {'message': 'Error updating user'}, 400
 
             user_schema = schemas.UserGetSchema()
             user_data = user_schema.dump(user)
@@ -211,8 +220,9 @@ class UserResource(Resource):
             return {'message': messages.USER_DELETED_SUCCESSFULLY}, 200
 
         except Exception as e:
-            logging.send_log_kafka('CRITICAL', __module_name__, 'UserResource.delete', str(e))
-            return {'message': messages.INTERNAL_SERVER_ERROR}, 500
+            logging.send_log_kafka('CRITICAL', __module_name__, 'UserResource.delete',
+                                    f'Error deleting user: {str(e)}')
+            return {'message': 'Error deleting user'}, 400
 
 
 class UserMeResource(Resource):
@@ -273,8 +283,9 @@ class UserMeResource(Resource):
                 logging.send_log_kafka('INFO', __module_name__, 'UserMeResource.patch',
                                        f'User {user_authenticated["uuid"]} updated successfully')
             except Exception as e:
-                logging.send_log_kafka('CRITICAL', __module_name__, 'UserMeResource.patch', str(e))
-                return {'message': messages.INTERNAL_SERVER_ERROR}, 500
+                logging.send_log_kafka('CRITICAL', __module_name__, 'UserMeResource.patch',
+                                        f'Error updating user: {str(e)}')
+                return {'message': 'Error updating user'}, 400
 
             user_schema = schemas.UserGetSchema()
             user_data = user_schema.dump(user)
@@ -283,6 +294,39 @@ class UserMeResource(Resource):
 
         except Exception as e:
             logging.send_log_kafka('CRITICAL', __module_name__, 'UserMeResource.patch', str(e))
+            return {'message': messages.INTERNAL_SERVER_ERROR}, 500
+
+
+class UserChangeRoleResource(Resource):
+    @staticmethod
+    @token_provider.verify_token
+    @token_provider.admin_required
+    def post(user_authenticated, user_uuid):
+        try:
+
+            user = repository.get_by_uuid(uuid=user_uuid)
+            if not user:
+                logging.send_log_kafka('INFO', __module_name__, 'UserChangeRoleResource.post',
+                                       f'User {user_uuid} not found')
+                return {'message': messages.USER_NOT_FOUND}, 404
+
+            try:
+                repository.update_role(user)
+                logging.send_log_kafka('INFO', __module_name__, 'UserChangeRoleResource.post',
+                                       f'Role of user {user_uuid} updated successfully by {user_authenticated["uuid"]}')
+            except Exception as e:
+                logging.send_log_kafka('CRITICAL', __module_name__, 'UserChangeRoleResource.post',
+                                        f'Error updating role of user {user_uuid}: {str(e)}')
+                return {'message': f'Error updating role of user {user_uuid}'}, 400
+
+
+            user_schema = schemas.UserGetSchema()
+            user_data = user_schema.dump(user)
+
+            return {'user': user_data}, 200
+
+        except Exception as e:
+            logging.send_log_kafka('CRITICAL', __module_name__, 'UserChangeRoleResource.post', str(e))
             return {'message': messages.INTERNAL_SERVER_ERROR}, 500
 
 
@@ -321,8 +365,9 @@ class UserMeChangePasswordResource(Resource):
                 logging.send_log_kafka('INFO', __module_name__, 'UserMeResource.patch',
                                        f'User {user_authenticated["uuid"]} changed password successfully')
             except Exception as e:
-                logging.send_log_kafka('CRITICAL', __module_name__, 'UserMeResource.patch', str(e))
-                return {'message': messages.INTERNAL_SERVER_ERROR}, 500
+                logging.send_log_kafka('CRITICAL', __module_name__, 'UserMeResource.patch',
+                                        f'Error changing password: {str(e)}')
+                return {'message':'Error changing password'}, 400
 
             return {'message': messages.PASSWORD_CHANGED_SUCCESSFULLY}, 200
 
@@ -373,10 +418,11 @@ class LoginResource(Resource):
                 logging.send_log_kafka('INFO', __module_name__, 'LoginResource.post',
                                        f'User {user["email"]} logged in successfully')
             except Exception as e:
-                logging.send_log_kafka('CRITICAL', __module_name__, 'LoginResource.post', str(e))
-                return {'message': messages.INTERNAL_SERVER_ERROR}, 500
+                logging.send_log_kafka('CRITICAL', __module_name__, 'LoginResource.post',
+                                        f'Error creating token: {str(e)}')
+                return {'message': 'Error creating token'}, 400
 
-            return {'token': token}, 200
+            return {'token': f'Bearer {token}'}, 200
 
         except Exception as e:
             logging.send_log_kafka('CRITICAL', __module_name__, 'LoginResource.post', str(e))
@@ -386,7 +432,7 @@ class LoginResource(Resource):
 class LogoutResource(Resource):
     @staticmethod
     @token_provider.verify_token
-    def post(user_authenticated):
+    def get(user_authenticated):
         try:
             token = request.headers['Authorization'].replace('Bearer ', '')
             cache.set(f'BLACKLIST_TOKEN_{token}', f'{token}')

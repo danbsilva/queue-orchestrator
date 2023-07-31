@@ -8,6 +8,9 @@ api = Api()
 def init_app(app):
     api.init_app(app)
 
+# Swagger
+api.add_resource(resources.SwaggerResource, '/logs/swagger.json',
+                    methods=['GET'])
 
 api.add_resource(resources.LogsServicesResource, '/logs/services/',
                  methods=['POST', 'GET'])

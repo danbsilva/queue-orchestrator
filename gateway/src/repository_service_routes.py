@@ -11,6 +11,8 @@ def create(service, new_service_route):
 
     return service_route
 
+def get_by_uuid(uuid):
+    return models.ServiceRoutes.query.filter_by(uuid=uuid).first()
 
 def get_by_service_id_and_route(service_id, route):
     return models.ServiceRoutes.query.filter_by(service_id=service_id, route=route).first()
@@ -19,6 +21,8 @@ def get_by_service_id_and_route(service_id, route):
 def get_by_service_id(service_id):
     return models.ServiceRoutes.query.filter_by(service_id=service_id).all()
 
+def get_by_route(route):
+    return models.ServiceRoutes.query.filter_by(route=route).first()
 
 def update(service_route, new_service_route):
     for key, value in new_service_route.items():

@@ -14,7 +14,7 @@ def verify_if_next_step_exists(msg, automation_item):
         if 'Exception' in msg['status']:
             current_step, message = next_step_not_exists(msg)
 
-            automation_item.status = 'Error'
+            automation_item.status = 'failed'
             msg['try_count'] = msg['try_count'] - 1
 
             description = f'{str(msg["status"])}'
@@ -24,7 +24,7 @@ def verify_if_next_step_exists(msg, automation_item):
         else:
             current_step, message = next_step_exists(msg, automation_item)
 
-            automation_item.status = 'Pending'
+            automation_item.status = 'pending'
             description = messages.ITEM_SENT_TO_QUEUE.format(current_step.topic)
             logging.send_log_kafka('INFO', __module_name__, 'verify_if_next_step_exists',
                                    f'Item {msg["uuid"]} sent to Queue {current_step.topic}', msg["transaction_id"])
@@ -32,7 +32,7 @@ def verify_if_next_step_exists(msg, automation_item):
         send_to_kafka(current_step, automation_item, message)
 
     else:
-        automation_item.status = 'Finished'
+        automation_item.status = 'finished'
         description = messages.ITEM_FINISHED
         logging.send_log_kafka('INFO', __module_name__, 'verify_if_next_step_exists',
                                f'Item {msg["uuid"]} finished.', msg["transaction_id"])
@@ -53,7 +53,7 @@ def next_step_exists(msg, automation_item):
 
     automation_item.automation_step = current_step
 
-    schema_automation_step_item = schemas.AutomationStepItemGetSchema()
+    schema_automation_step_item = schemas.AutomationItemGetSchema()
     schema_data = schema_automation_step_item.dump(automation_item)
 
     json_steps = {
@@ -96,7 +96,7 @@ def items_processed(app, key, msg):
 
             else:
                 if 'Exception' in msg['status']:
-                    automation_item.status = 'Error'
+                    automation_item.status = 'failed'
                     description = f'{str(msg["status"])}'
                     logging.send_log_kafka('EXCEPTION', __module_name__, 'items_processed',
                                            f'It was not possible to process the item {msg["uuid"]}',
@@ -130,7 +130,7 @@ def items_in_process(app, key, msg):
     with app.app_context():
         automation_item = repository_automation_item.get_by_uuid(uuid=msg['uuid'])
         if automation_item:
-            automation_item.status = 'Running'
+            automation_item.status = 'running'
             try:
                 repository_automation_item.update_status(automation_item)
                 logging.send_log_kafka('INFO', __module_name__, 'items_in_progress',

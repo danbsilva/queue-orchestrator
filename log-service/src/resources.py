@@ -11,6 +11,7 @@ from src import schemas, messages, logging
 from src import repository_service_log, repository_request_log
 from src.providers import cors_provider
 from werkzeug.exceptions import UnsupportedMediaType
+from src.docs import logs
 
 
 __module_name__ = 'src.resources'
@@ -30,6 +31,10 @@ def validate_schema(schema, data):
         schema.load(data)
     except ValidationError as e:
         return e.messages
+
+class SwaggerResource(Resource):
+    def get(self):
+        return logs.doc_swagger
 
 
 class LogsServicesResource(Resource):

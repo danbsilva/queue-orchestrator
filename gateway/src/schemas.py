@@ -12,7 +12,7 @@ class ServiceGetSchema(Schema):
     service_name = fields.String(required=True)
     service_host = fields.String(required=True)
     service_status = fields.String(required=True)
-    service_routes = Nested('ServiceRouteGetSchema', many=True)
+    #service_routes = Nested('ServiceRouteGetSchema', many=True)
     created_at = fields.DateTime(required=True)
     updated_at = fields.DateTime(required=True)
 
@@ -20,10 +20,16 @@ class ServiceGetSchema(Schema):
         ordered = True
 
 
+class ServicePatchSchema(Schema):
+    service_name = fields.String(required=False, validate=validate.Length(min=1, max=100))
+    service_host = fields.String(required=False, validate=validate.Length(min=1, max=500))
+    service_status = fields.String(required=False, validate=validate.Length(min=1, max=100))
+
+
 class ServiceRoutePostSchema(Schema):
     route = fields.String(required=True, validate=validate.Length(min=1, max=100))
     args = fields.String(required=True, validate=validate.Length(min=0, max=500))
-    methods_allowed = fields.List(fields.String, required=True, validate=validate.Length(min=1))
+    methods_allowed = fields.List(fields.Dict, required=True, validate=validate.Length(min=1))
     required_auth = fields.Boolean(required=False)
     required_admin = fields.Boolean(required=False)
 
@@ -32,7 +38,7 @@ class ServiceRouteGetSchema(Schema):
     uuid = fields.String(required=True)
     route = fields.String(required=True)
     args = fields.String(required=True)
-    methods_allowed = fields.List(fields.String, required=True)
+    methods_allowed = fields.List(fields.Dict, required=True)
     required_auth = fields.Boolean(required=True)
     required_admin = fields.Boolean(required=True)
     created_at = fields.DateTime(required=True)
@@ -40,3 +46,11 @@ class ServiceRouteGetSchema(Schema):
 
     class Meta:
         ordered = True
+
+
+class ServiceRoutePatchSchema(Schema):
+    route = fields.String(required=False, validate=validate.Length(min=1, max=100))
+    args = fields.String(required=False, validate=validate.Length(min=0, max=500))
+    methods_allowed = fields.List(fields.String, required=False, validate=validate.Length(min=1))
+    required_auth = fields.Boolean(required=False)
+    required_admin = fields.Boolean(required=False)

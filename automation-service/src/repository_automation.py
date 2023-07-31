@@ -1,3 +1,5 @@
+import json
+
 from sqlalchemy import text
 
 from src.extensions.flask_sqlalchemy import db
@@ -55,3 +57,24 @@ def update(automation, new_automation):
 def delete(automation):
     db.session.delete(automation)
     db.session.commit()
+
+
+def add_owners(automation, owner):
+    owners_list = automation.owners
+    new_owners_list = [o for o in owners_list if o["uuid"] != owner["uuid"]]
+    new_owners_list.append(owner)
+
+    automation.owners = new_owners_list
+    db.session.commit()
+
+    return automation
+
+
+def remove_owners(automation, owner):
+    owners_list = automation.owners
+    new_owners_list = [o for o in owners_list if o["uuid"] != owner["uuid"]]
+
+    automation.owners = new_owners_list
+    db.session.commit()
+
+    return automation
