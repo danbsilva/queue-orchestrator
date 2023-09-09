@@ -1,0 +1,43 @@
+<!--Step Form -->
+<div class="row">
+    <div class="col-lg-4 order-0">
+        <div id="div-{{form.name.id}}" class="form-group mb-2">
+            {{ form.name.label(class="col-form-label",for=form.name.data) }}
+            {{ form.name(class="form-control input-error", placeholder="Nome") }}
+        </div>
+    </div>
+    <div class="col-lg-2 order-0">
+        <div id="div-{{form.step.id}}" class="form-group mb-2">
+            {{ form.step.label(class="col-form-label",for=form.step.data) }}
+            {{ form.step(class="form-control input-error", placeholder="Passo") }}
+        </div>
+    </div>
+    <div class="col-lg-4 order-0">
+        <div id="div-{{form.topic.id}}" class="form-group mb-2">
+            {{ form.topic.label(class="col-form-label",for=form.topic.data) }}
+            {{ form.topic(class="form-control input-error", placeholder="Tópico") }}
+        </div>
+    </div>
+    <div class="col-lg-2 order-0">
+        <div id="div-{{form.try_count.id}}" class="form-group mb-2">
+            {{ form.try_count.label(class="col-form-label",for=form.try_count.data) }}
+            {{ form.try_count(class="form-control input-error", placeholder="Tentativas") }}
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12 order-0">
+        <div id="div-{{form.description.id}}" class="form-group mb-2">
+            {{ form.description.label(class="col-form-label",for=form.description.data) }}
+            {{ form.description(class="form-control input-error", placeholder="Descrição") }}
+
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12 order-0 text-end">
+        <button type="button" class="btn btn-danger waves-effect waves-light" onclick="window.history.back();">Cancelar</button>
+        {{ form.submit(class="btn btn-primary waves-effect waves-light") }}
+    </div>
+</div>
+

@@ -1,0 +1,104 @@
+{% if lotes.items %}
+<div id="lotes" class="row">
+    {% for lote in lotes.items %}
+    <div class="col-xl-3 col-sm-6 mb-4">
+        <div class="card plan-box">
+            <div class="card-body">
+                <a href="{{ url_for('webui.lote', id=lote.id)}}" class="text-dark">
+                    <div class="d-flex">
+                        <div class="flex-grow-1">
+                            <h5>{{lote}}</h5>
+                            <p class="text-muted font-size-12">{{lote.loteamento}}</p>
+                        </div>
+                    </div>
+                    <div class="text-center plan-btn">
+
+                    </div>
+                    <div class="plan-features mt-5">
+                        <p><i class="bx bx-checkbox-square text-primary me-2"></i> {{lote.codigo}}</p>
+                        <p><i class="bx bx-checkbox-square text-primary me-2"></i> {{lote.quadra}}</p>
+                        <p><i class="bx bx-checkbox-square text-primary me-2"></i> {{lote.area}} m2</p>
+                        <p><i class="bx bx-checkbox-square text-primary me-2"></i> {{lote.status}}</p>
+                    </div>
+                </a>
+            </div>
+            <div class="card-footer bg-transparent border-top text-center">
+                <div class="contact-links d-flex">
+                    <div class="flex-fill">
+                        <a id="{{lote.id}}" class="a-delete text-danger"  data-id="{{lote.lote}}" href="javascript:void(0);">
+                            <i class="bx bx-trash"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<div class="row">
+    <div class="col-lg-12 mb-4 order-0">
+        <nav aria-label="Page navigation">
+            <ul class="pagination pagination-rounded justify-content-center mt-2 mb-5">
+                <li class="page-item prev {% if lotes.page == 1 %}disabled{% endif %}">
+                  <a id="1" class="page-link a-page" href="javascript:void(0);">
+                      <i class="tf-icon bx bx-chevrons-left"></i>
+                  </a>
+                </li>
+                {% for page_num in lotes.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=1) %}
+                    <!-- Check for the active page and set the link to "Active"-->
+                    {% if page_num %}
+                        {% if lotes.page == page_num %}
+                        <li class="page-item active">
+                          <a id="{{page_num}}" class="page-link a-page" href="javascript:void(0);">{{ page_num }}</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item">
+                          <a id="{{page_num}}" class="page-link a-page" href="javascript:void(0);">{{ page_num }}</a>
+                        </li>
+                        {% endif %}
+                    {% else %}
+                        ...
+                    {% endif %}
+                {% endfor %}
+                <li class="page-item next {% if lotes.page == lotes.pages %}disabled{% endif %}">
+                  <a id="{{lotes.pages}}" class="page-link a-page" href="javascript:void(0);"
+                    ><i class="tf-icon bx bx-chevrons-right"></i
+                  ></a>
+                </li>
+            </ul>
+        </nav>
+
+    </div>
+</div>
+{% else%}
+<div class="row">
+    <div class="col-lg-12 mb-4 order-0">
+        <div class="pagination pagination-rounded justify-content-center mt-2 mb-5">Sem lotes</div>
+
+    </div>
+</div>
+{% endif %}
+
+<script>
+    $('.a-page').click(function(e){
+        e.preventDefault();
+
+        page = $(this).attr('id');
+        per_page = $('#lotes-per-page').children("option:selected").val();
+        search = $('#lotes-search').val();
+        view = 'grid';
+        loadPageLotes(page, per_page, search, view);
+    });
+
+     $(".a-delete").click(function (e) {
+        e.preventDefault();
+        var id = $(this).attr("id");
+        var lote = $(this).attr("data-id");
+        $('#delete').attr("data-id", "div-" + id);
+        $('#delete').addClass('deletelote');
+        $('.modal-body').html('Deseja realmente excluir o lote <b>' + lote + '</b>?');
+        $('#confirmDelete').modal('show');
+    });
+
+</script>
+

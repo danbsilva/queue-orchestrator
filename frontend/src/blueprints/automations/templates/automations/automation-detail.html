@@ -1,0 +1,96 @@
+  <div class="card-header pt-10 pb-0">
+        <div class="row">
+            <div class="col-lg-12">
+                <nav aria-label="Page navigation">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                        <h5 class="flex-shrink-0">{{ loteador }}</h5>
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-end">
+                                <li class="breadcrumb-item">
+                                    <a class="btn btn-sm btn-info text-white waves-effect waves-light editloteador text-info" href="javascript:void(0);" id="editloteador" data-id="{{loteador.id}}">
+                                      <i class="bx bxs-edit bx-xs"></i> Editar
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <div class="row">
+            <div class="row task-dates mb-4">
+               <div class="col-sm-6 col-6">
+                    <h8 class="">CNPJ</h8>
+                    <p class="text-muted">{{loteador.cnpj}}</p>
+                </div>
+               <div class="col-sm-6 col-6">
+                    <h8 class="">Razão Social</h8>
+                    <p class="text-muted">{{loteador.razao_social}}</p>
+                </div>
+            </div>
+            <div class="row task-dates mb-4">
+                <div class="col-sm-12 col-12">
+                    <h8 class="">Qualificação</h8>
+                    <p class="text-muted">{{loteador.qualificacao}}</p>
+                </div>
+            </div>
+            {% if loteador.updated %}
+            <div class="row task-dates mb-4">
+                <div class="col-sm-8 col-8">
+                    <div class="mt-4">
+                        <h7 class="" style="font-size:12px;"><i class="bx bx-user me-1 text-primary"></i> Atualizado por:</h7>
+                        <ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">
+                            <li
+                              data-bs-toggle="tooltip"
+                              data-popup="tooltip-custom"
+                              data-bs-placement="top"
+                              class=""
+                              title="{{ loteador.updated.nome }}"
+                            >
+                                <p class="text-muted mb-0" style="font-size:12px;">{{ loteador.updated.nome }}</p>
+                            </li>
+                        </ul>
+
+                    </div>
+                </div>
+
+                <div class="col-sm-4 col-4">
+                    <div class="mt-4">
+                        <h7 class="" style="font-size:12px;"><i class="bx bx-calendar me-1 text-primary"></i> Atualizado em</h7>
+                        <p class="text-muted mb-0" style="font-size:12px;">{{ loteador.updated_at.strftime("%d %b, %Y às %H:%M") }}</p>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="row task-dates mb-4">
+                <div class="col-sm-8 col-8">
+                    <div class="mt-4">
+                        <h7 class="" style="font-size:12px;"><i class="bx bx-user me-1 text-primary"></i> Cadastrado por</h7>
+                        <ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">
+                            <li
+                              data-bs-toggle="tooltip"
+                              data-popup="tooltip-custom"
+                              data-bs-placement="top"
+                              class=""
+                              title="{{ loteador.created.nome }}"
+                            >
+                                <p class="text-muted mb-0" style="font-size:12px;">{{ loteador.created.nome }}</p>
+                            </li>
+                        </ul>
+
+                    </div>
+                </div>
+
+                <div class="col-sm-4 col-4">
+                    <div class="mt-4">
+                        <h7 class="" style="font-size:12px;"><i class="bx bx-calendar me-1 text-primary"></i> Cadastrado em</h7>
+                        <p class="text-muted mb-0" style="font-size:12px;">{{ loteador.created_at.strftime("%d %b, %Y às %H:%M") }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>

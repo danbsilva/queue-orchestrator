@@ -1,0 +1,58 @@
+<div class="card-header pt-10 pb-0">
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    <li class="breadcrumb-item active">ITENS
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div class="col-lg-4">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-end">
+                    <li class="breadcrumb-item">
+                        <a href="javascript:void(0);" data-step="{{ step.uuid }}" type="button" class="btn p-0 text-success pull-up-full additembystep">
+                            <i class="bx bx-xs bxs-plus-circle"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12 order-0">
+            <div class="row">
+                <div class="col-lg-8">
+                    <label class="col-form-label">Itens por página</label>
+                    <select class="form-select select2" id="item-per-page" data-step="{{ step.uuid }}" style="max-width:110px;">
+                        <option value="10" selected>10</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <div class="col-lg-4">
+                    <label class="col-form-label">Pesquisar</label>
+                    <input id="item-search" class="form-control" type="search" placeholder="Pesquisar ...">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="items">
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        per_page = $('#item-per-page').children("option:selected").val();
+        step_uuid = '{{ step.uuid }}';
+        loadPageItemsByStep(step_uuid, 1, per_page);
+    });
+
+</script>
+
+
+
+

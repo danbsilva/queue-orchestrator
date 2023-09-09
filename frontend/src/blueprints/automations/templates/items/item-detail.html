@@ -1,0 +1,56 @@
+
+<div class="card-header pt-10 pb-0">
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    <li class="breadcrumb-item">
+                        <a href="javascript:void(0);">Home</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{{url_for('automations.view_automation', uuid=step.automation.uuid)}}">{{ step.automation.name }}</a>
+                    </li>
+                    <li class="breadcrumb-item active">{{ step.name | upper }}</li>
+                </ul>
+            </nav>
+        </div>
+        <div class="col-lg-4">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-end">
+                    <li class="breadcrumb-item">
+                        <a href="javascript:void(0);" class="btn p-0 text-info pull-up-full addautomation">
+                            <i class="bx bx-xs bxs-edit"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="card-body">
+    <div class="row">
+        <div class="col-lg-4 order-0 mb-4">
+            <label class="col-form-label">Nome</label>
+            <p class="form-control-static font-size-16">{{ step.name | upper }}</p>
+        </div>
+        <div class="col-lg-2 order-0 mb-4">
+            <label class="col-form-label">Etapa</label>
+            <p class="form-control-static font-size-16">{{ step.step | upper }}</p>
+        </div>
+        <div class="col-lg-2 order-0 mb-4">
+            <label class="col-form-label">Tentativas</label>
+            <p class="form-control-static font-size-16">{{ step.try_count | upper }}</p>
+        </div>
+        <div class="col-lg-2 order-0 mb-4">
+            <label class="col-form-label">Tópico</label>
+            <p class="form-control-static font-size-16">{{ step.topic | upper }}</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12 order-0">
+            <label class="col-form-label">Descrição</label>
+            <p class="form-control-static font-size-16">{{ step.description | upper }}</p>
+        </div>
+    </div>
+</div>

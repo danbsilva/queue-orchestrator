@@ -1,0 +1,31 @@
+{% extends 'webui/index.html' %}
+{% block title %}{{config.get('TITLE')}}{% endblock %}
+
+
+{% block content %}
+
+    <div id="steps" class="row">
+
+        <!-- Step -->
+        <div class="col-lg-12 mb-4 order-0">
+            <div id="step-detalhe" class="card mb-4">
+            </div>
+        </div>
+
+        <!-- Steps -->
+        <div class="col-lg-12 mb-4 order-0">
+            <div id="step-fields" class="card mb-4">
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        $(document).ready(function() {
+
+            loadDetailStep('{{ step.uuid }}');
+
+        });
+    </script>
+
+{% endblock %}

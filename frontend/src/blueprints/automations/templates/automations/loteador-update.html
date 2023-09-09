@@ -1,0 +1,17 @@
+
+<div class="col-lg-12 mb-12 order-0">
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form id="UpdateLoteadorForm" role="application" class="wizard clearfix" novalidate="novalidate">
+                {% include 'webui/loteadores/loteador-form.html' %}
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function(){
+        loadFormLoteador("#UpdateLoteadorForm");
+    });
+</script>

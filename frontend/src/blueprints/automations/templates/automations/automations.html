@@ -1,0 +1,115 @@
+{% extends 'webui/index.html' %}
+{% block title %}{{config.get('TITLE')}}{% endblock %}
+
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-12 mb-4 order-0">
+            <div class="card">
+                <div class="card-body pt-10 pb-0">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination">
+                                    <li class="breadcrumb-item">
+                                        <a href="javascript:void(0);">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item active">Loteadores</li>
+                                </ul>
+                            </nav>
+                        </div>
+                        <div class="col-lg-4">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-end">
+                                    <li class="breadcrumb-item">
+                                        <a href="javascript:void(0);" class="btn btn-sm btn-success text-white waves-effect waves-light addloteador">
+                                            <i class="bx bx-xs bxs-plus-circle"></i> Adicionar
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12 mb-4 order-0">
+            <div class="row">
+                <div class="col-lg-4">
+                    <select class="form-select" id="loteadores-per-page"  style="max-width:70px;">
+                        <option value="1">1</option>
+                        <option value="3">3</option>
+                        <option value="6">6</option>
+                        <option value="9" selected>9</option>
+                    </select>
+                </div>
+                <div class="col-4">
+                    <div>
+                        <ul class="nav nav-pills justify-content-end">
+                            <li class="nav-item ">
+                                <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Visualização :</a>
+                            </li>
+                            <li class="nav-item pull-up-full" data-bs-placement="top" title="List">
+                                <a class="nav-link active view-loteador list view-ativa" data-view="list" value="list">
+                                    <i class="bx bx-list-ul"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item pull-up-full" data-bs-placement="top" title="Grid">
+                                <a class="nav-link view-loteador grid" data-view="grid" value="grid">
+                                    <i class="bx bxs-grid-alt"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <input id="loteadores-search" class="form-control" type="search" placeholder="Pesquisar ...">
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div id="loteadores">
+
+    </div>
+
+    <div id="modalFormLoteador" class="modal fade bs-example-modal-lg" tabindex="-1" aria-labelledby="myLargeModalLabel" style="display: none;" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title mt-0 add-task-title" style="display: block;">Novo lote</h5>
+                    <h5 class="modal-title mt-0 update-task-title" style="display: none;">Atualizar lote</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="NewLoteadorForm" class="" role="form" novalidate>
+
+                    </form>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            per_page = $('#loteadores-per-page').children("option:selected").val();
+            search = $('#loteadores-search').val();
+            view =  'list';
+            loadPageLoteadores(1, per_page, search, view);
+
+        });
+
+        $('.addloteador').click(function(e){
+            e.preventDefault();
+            loadFormLoteador(0, "#NewLoteadorForm");
+        });
+
+    </script>
+
+{% endblock %}
+
+
+

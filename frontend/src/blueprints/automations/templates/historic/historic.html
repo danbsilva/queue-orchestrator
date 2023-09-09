@@ -1,0 +1,59 @@
+<div class="card-header pt-10 pb-0">
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    <li class="breadcrumb-item active">ETAPAS
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div class="col-lg-4">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-end">
+                    <li class="breadcrumb-item">
+                        <a href="javascript:void(0);" data-automation="{{ automation.uuid }}" type="button" class="btn p-0 text-success pull-up-full addstep">
+                            <i class="bx bx-xs bxs-plus-circle"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12 order-0">
+            <div class="row">
+                <div class="col-lg-8">
+                    <label class="col-form-label">Itens por página</label>
+                    <select class="form-select select2" id="step-per-page" data-automation="{{ automation.uuid }}" style="max-width:110px;">
+                        <option value="10" selected>10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <div class="col-lg-4">
+                    <label class="col-form-label">Pesquisar</label>
+                    <input id="step-search" class="form-control" type="search" placeholder="Pesquisar ...">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="steps">
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        automation_uuid = '{{ automation.uuid }}';
+        per_page = $('#step-per-page').children("option:selected").val();
+        loadPageSteps(automation_uuid, 1, per_page);
+    });
+
+</script>
+
+
+
+

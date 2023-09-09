@@ -1,0 +1,67 @@
+    <!-- JQuery -->
+    <script src="{{url_for('webui.static', filename='assets/vendor/libs/jquery/jquery.js')}}"></script>
+    <script src="{{url_for('webui.static', filename='assets/vendor/libs/jquery-validation/jquery.validate.min.js')}}"></script>
+    <script src="{{url_for('webui.static', filename='assets/vendor/libs/jquery-steps/jquery-steps.min.js')}}"></script>
+    <script src="{{url_for('webui.static', filename='assets/vendor/libs/jquery-repeater/jquery-repeater.min.js')}}"></script>
+
+    <!-- Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{url_for('webui.static', filename='assets/vendor/libs/select2/js/bootstrap-select.js')}}" ></script>
+    <script src="https://unpkg.com/multiple-select@1.5.2/dist/multiple-select.min.js"></script>
+
+    <!-- Libs JS -->
+    <!-- build:js assets/vendor/js/core.js -->
+    <script src="{{url_for('webui.static', filename='assets/vendor/libs/popper/popper.js')}}"></script>
+    <script src="{{url_for('webui.static', filename='assets/vendor/libs/apex-charts/apexcharts.js')}}"></script>
+    <script src="{{url_for('webui.static', filename='assets/vendor/libs/owl.carousel/owl.carousel.min.js')}}"></script>
+    <script src="{{url_for('webui.static', filename='assets/vendor/libs/dragula/dragula.min.js')}}"></script>
+    <script src="{{url_for('webui.static', filename='assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js')}}"></script>
+    <script src="{{url_for('webui.static', filename='assets/vendor/libs/inputmask/jquery.inputmask.bundle.min.js')}}"></script>
+    <script src="{{url_for('webui.static', filename='assets/vendor/libs/inputmask/jquery.mask.min.js')}}"></script>
+    <script src="{{url_for('webui.static', filename='assets/vendor/libs/tagsinput/tagsinput.js')}}"></script>
+
+    <!-- Helpers -->
+    <script src="{{url_for('webui.static', filename='assets/js/helpers.js')}}"></script>
+
+    <!-- Vendors JS -->
+    <script src="{{url_for('webui.static', filename='assets/vendor/js/menu.js')}}"></script>
+
+    <!-- Main JS -->
+    <script src="{{url_for('webui.static', filename='assets/js/main.js')}}"></script>
+
+    <!-- Core JS -->
+    <script src="{{url_for('webui.static', filename='assets/js/core/extended-ui-perfect-scrollbar.js')}}"></script>
+    <script src="{{url_for('webui.static', filename='assets/js/core/ui-popover.js')}}"></script>
+
+    <!-- Pages JS -->
+    <script src="{{url_for('webui.static', filename='assets/js/pages/form-advanced.init.js')}}"></script>
+    <script src="{{url_for('webui.static', filename='assets/js/pages/loteador.js')}}"></script>
+    <script src="{{url_for('webui.static', filename='assets/js/pages/loteamento.js')}}"></script>
+    <script src="{{url_for('webui.static', filename='assets/js/pages/lote.js')}}"></script>
+    <script src="{{url_for('webui.static', filename='assets/js/pages/cliente.js')}}"></script>
+    <script src="{{url_for('webui.static', filename='assets/js/pages/orcamento.js')}}"></script>
+    <script src="{{url_for('webui.static', filename='assets/js/pages/ordem_servico.js')}}"></script>
+
+
+
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+    <script>
+
+        $('#timeline-carousel').owlCarousel({
+            items: 1,
+            loop: false,
+            margin:0,
+            nav: false,
+            dots: true,
+            responsive:{
+                576:{
+                    items:2
+                },
+
+                768:{
+                    items:4
+                },
+            }
+        });
+    </script>

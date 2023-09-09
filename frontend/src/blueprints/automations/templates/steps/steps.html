@@ -1,0 +1,68 @@
+<div class="card-header pt-10 pb-0">
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    <li class="breadcrumb-item">
+                        <a href="javascript:void(0);">ITENS</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div class="col-lg-4">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-end">
+                    <li class="breadcrumb-item">
+                        <a href="javascript:void(0);" data-automation="{{ automation.uuid }}" type="button" class="btn p-0 text-success pull-up-full additembyautomation">
+                            <i class="bx bx-xs bxs-plus-circle"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12 order-0">
+            <div class="row">
+                <div class="col-lg-2">
+                    <label class="col-form-label">Itens por página</label>
+                    <select class="form-select select2" id="item-per-page" data-automation="{{ automation.uuid }}" style="max-width:110px;">
+                        <option value="10" selected>10</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <div class="col-lg-6">
+                    <label class="col-form-label">Etapa</label>
+                    <select class="form-select select2" id="item-step" data-automation="{{ automation.uuid }}" style="max-width:250px;">
+                        <option value="all" selected>Todos as etapas</option>
+                        {% for step in steps %}
+                        <option value="{{ step.uuid }}">{{ step.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-lg-4">
+                    <label class="col-form-label">Pesquisar</label>
+                    <input id="item-search" class="form-control" type="search" placeholder="Pesquisar ...">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="items">
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        per_page = $('#item-per-page').children("option:selected").val();
+        automation_uuid = '{{ automation.uuid }}';
+        loadPageItemsByAutomation(automation_uuid, 1, per_page);
+    });
+
+</script>
+
+
+
+

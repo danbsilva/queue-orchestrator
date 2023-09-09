@@ -1,0 +1,32 @@
+{{ form.csrf_token() }}
+{{ form.id() }}
+
+<!--Loteador-->
+<h3 id="example-advanced-form-h-0" tabindex="-1" class="title current">Loteador</h3>
+<fieldset id="example-advanced-form-p-0" role="tabpanel" aria-labelledby="example-advanced-form-h-0" class="body current" aria-hidden="false" style="display: none;">
+    <div class="row">
+        <div class="col-lg-6 order-0">
+            <div id="div-{{form.cnpj.id}}" class="form-group mb-2">
+                {{ form.cnpj.label(class="col-form-label",for=form.cnpj.data) }}
+                {{ form.cnpj(class="form-control input-error cnpj", placeholder="99.999.999/9999-99") }}
+
+            </div>
+        </div>
+        <div class="col-lg-6 order-0">
+            <div id="div-{{form.razao_social.id}}" class="form-group mb-2">
+                {{ form.razao_social.label(class="col-form-label",for=form.razao_social.data) }}
+                {{ form.razao_social(class="form-control input-error", placeholder="Razão Social") }}
+
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12 order-0">
+            <div id="div-{{form.qualificacao.id}}" class="form-group mb-2">
+                {{ form.qualificacao.label(class="col-form-label",for=form.qualificacao.data) }}
+                {{ form.qualificacao(class="form-control input-error", placeholder="Qualificação") }}
+
+            </div>
+        </div>
+    </div>
+</fieldset>

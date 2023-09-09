@@ -1,0 +1,27 @@
+<div class="col-lg-2 mb-5 mt-2 order-0">
+    <div class="menu-vertical menu bg-menu-theme">
+        <ul class="menu-inner py-1 mt-3 mb-3">
+            <li class="menu-item active">
+              <a href="javascript: void(0);" class="menu-link loteador-informacoes" data-id="{{loteador.id}}">
+                <div>Loteador</div>
+              </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="col-lg-10 mb-4 order-0">
+
+    <div id="loteador-detalhe" class="card mb-4">
+
+    </div>
+
+</div>
+
+<script>
+    $(document).ready(function() {
+       loadDetailLoteador({{loteador.id}})
+
+    });
+
+</script>

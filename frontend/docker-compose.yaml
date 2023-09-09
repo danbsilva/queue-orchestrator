@@ -1,0 +1,66 @@
+version: "3.8"
+
+# Networks
+networks:
+  queue_orchestrator:
+    external: true
+
+volumes:
+  # DbServices
+  dbservices_data:
+
+services:
+
+  # Services and Gateway
+  gateway-db:
+    image: postgres:alpine
+    container_name: dbservices
+    environment:
+      POSTGRES_DB: services
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - '5400:5432'
+    expose:
+      - "5432"
+    networks:
+      - queue_orchestrator
+    depends_on:
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - dbservices_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD", "psql", "services", "-U", "admin" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: on-failure
+
+  gateway:
+    build:
+      context: gateway
+      dockerfile: Dockerfile
+    container_name: gateway
+    environment:
+      APP_PORT: 2000
+    ports:
+      - '2000:2000'
+    expose:
+      - "2000"
+    volumes:
+      - ./gateway/:/app/
+    depends_on:
+      gateway-db:
+        condition: service_healthy
+    networks:
+      - queue_orchestrator
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:2000/health/" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: on-failure
+    command: sh -c "gunicorn -b :2000 main:main_app --workers 1 --threads 8 --timeout 0 --log-level debug --reload"

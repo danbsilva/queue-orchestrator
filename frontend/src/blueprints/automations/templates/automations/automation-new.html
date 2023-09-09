@@ -1,0 +1,46 @@
+{% extends 'webui/index.html' %}
+{% block title %}{{config.get('TITLE')}}{% endblock %}
+
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-12 mb-4 order-0">
+            <div class="card">
+                <div class="card-body pt-10 pb-0">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination">
+                                    <li class="breadcrumb-item">
+                                        <a href="javascript:void(0);">Home</a>
+                                      </li>
+                                      <li class="breadcrumb-item">
+                                        <a href="{{url_for('webui.loteadores')}}">Loteadores</a>
+                                      </li>
+                                      <li class="breadcrumb-item active">Cadastro</li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+    <div class="col-lg-12 mb-12 order-0">
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <form id="NewLoteadorForm" role="application" class="wizard clearfix" novalidate="novalidate">
+                    {% include 'webui/loteadores/loteador-form.html' %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function(){
+        loadFormLoteador("#NewLoteadorForm");
+    });
+</script>
+{% endblock %}

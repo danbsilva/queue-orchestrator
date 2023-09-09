@@ -1,0 +1,5 @@
+<form id="NewAutomationForm" role="application" novalidate="novalidate">
+    {{ form.csrf_token() }}
+    {{ form.uuid() }}
+    {% include 'automations/automation-form.html' %}
+</form>
