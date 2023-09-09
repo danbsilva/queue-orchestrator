@@ -1,6 +1,6 @@
 from src.controllers.swaggercontroller import SwaggerResource
 
 
-class RoutesSwagger:
+class SwaggerRoutes:
     def __init__(self, api):
         api.add_resource(SwaggerResource, '/swagger.json', methods=['GET'])

@@ -4,30 +4,24 @@
 
 {% block content %}
 
-    <div id="automations" class="row">
+    <div id="steps" class="row">
 
-        <!-- Automation -->
-        <div class="col-lg-8 mb-4 order-0">
-            <div id="automation-detalhe" class="card mb-4">
-            </div>
-        </div>
-
-        <!-- Owners -->
-        <div class="col-lg-4 mb-4 order-0">
-            <div id="automation-owners" class="card mb-4">
-            </div>
-        </div>
-
-        <!-- Steps -->
+        <!-- Step -->
         <div class="col-lg-12 mb-4 order-0">
-            <div id="automation-steps" class="card mb-4">
-                {% include 'steps/steps.html' %}
+            <div id="step-detalhe" class="card mb-4">
+            </div>
+        </div>
+
+        <!-- Fields -->
+        <div class="col-lg-12 mb-4 order-0">
+            <div id="step-fields" class="card mb-4">
+                {% include 'fields/fields.html' %}
             </div>
         </div>
 
         <!-- Items -->
         <div class="col-lg-12 mb-4 order-0">
-            <div id="automation-items" class="card mb-4">
+            <div id="step-items" class="card mb-4">
                 {% include 'items/items.html' %}
             </div>
         </div>
@@ -36,10 +30,7 @@
 
     <script>
         $(document).ready(function() {
-
-            loadDetailAutomation('{{ automation.uuid }}');
-            loadPageSteps('{{ automation.uuid }}', 1);
-
+            loadDetailStep('{{ step.uuid }}');
         });
     </script>
 

@@ -2,24 +2,24 @@ from src.extensions.flask_sqlalchemy import db
 from src import models
 
 
-__module_name__ = 'src.repository_item_history'
+__module_name__ = 'src.repository_item_historic'
 
 
 def create(item, description):
-    history = models.ItemHistoric()
-    history.item = item
-    history.description = description
+    historic = models.ItemHistoric()
+    historic.item = item
+    historic.description = description
 
-    db.session.add(history)
+    db.session.add(historic)
     db.session.commit()
 
-    return history
+    return historic
 
 
 def get_all_by_item_id(item_id):
-    return models.ItemHistoric.query.filter_by(item_id=item_id).all()
+    return models.ItemHistoric.query.filter_by(item_id=item_id).order_by(models.ItemHistoric.id).all()
 
-def delete(history):
-    db.session.delete(history)
+def delete(historic):
+    db.session.delete(historic)
     db.session.commit()
-    return history
+    return historic

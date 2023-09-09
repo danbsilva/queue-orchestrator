@@ -46,7 +46,7 @@ def convert_to_swagger_dict(schema):
 paths = {
     '/services/': {
         'post': {
-            'tags': ['Services'],
+            'tags': ['services'],
             'description': 'Create a new service',
             'parameters': [
                 {
@@ -64,12 +64,144 @@ paths = {
             }
         },
         'get': {
-            'tags': ['Services'],
+            'tags': ['services'],
             'description': 'Get all services',
             'responses': {
                 '200': {
                     'description': 'All services',
                     'schema': {'$ref': '#/definitions/ServiceGetSchema'}
+                }
+            }
+        }
+    },
+    '/services/{service_uuid}/': {
+        'get': {
+            'tags': ['services'],
+            'description': 'Get a service',
+            'parameters': [
+                {
+                    'name': 'service_uuid',
+                    'in': 'path',
+                    'type': 'string',
+                    'required': True
+                }
+            ],
+            'responses': {
+                '200': {
+                    'description': 'Service',
+                    'schema': {'$ref': '#/definitions/ServiceGetSchema'}
+                }
+            }
+        },
+        'patch': {
+            'tags': ['services'],
+            'description': 'Update a service',
+            'parameters': [
+                {
+                    'name': 'service_uuid',
+                    'in': 'path',
+                    'type': 'string',
+                    'required': True
+                },
+                {
+                    'name': 'body',
+                    'in': 'body',
+                    'schema': {'$ref': '#/definitions/ServicePatchSchema'},
+                    'required': True
+                }
+            ],
+            'responses': {
+                '200': {
+                    'description': 'Service updated',
+                    'schema': {'$ref': '#/definitions/ServiceGetSchema'}
+                }
+            }
+        }
+    },
+    '/services/{service_uuid}/routes/': {
+        'post': {
+            'tags': ['routes'],
+            'description': 'Create a new route',
+            'parameters': [
+                {
+                    'name': 'service_uuid',
+                    'in': 'path',
+                    'type': 'string',
+                    'required': True
+                },
+                {
+                    'name': 'body',
+                    'in': 'body',
+                    'schema': {'$ref': '#/definitions/ServiceRoutePostSchema'},
+                    'required': True
+                }
+            ],
+            'responses': {
+                '201': {
+                    'description': 'Route created',
+                    'schema': {'$ref': '#/definitions/ServiceRouteGetSchema'}
+                },
+            }
+        },
+        'get': {
+            'tags': ['routes'],
+            'description': 'Get all routes',
+            'parameters': [
+                {
+                    'name': 'service_uuid',
+                    'in': 'path',
+                    'type': 'string',
+                    'required': True
+                }
+            ],
+            'responses': {
+                '200': {
+                    'description': 'All routes',
+                    'schema': {'$ref': '#/definitions/ServiceRouteGetSchema'}
+                }
+            }
+        }
+    },
+    '/services/routes/{route_uuid}/': {
+        'get': {
+            'tags': ['routes'],
+            'description': 'Get a route',
+            'parameters': [
+                {
+                    'name': 'route_uuid',
+                    'in': 'path',
+                    'type': 'string',
+                    'required': True
+                }
+            ],
+            'responses': {
+                '200': {
+                    'description': 'Route',
+                    'schema': {'$ref': '#/definitions/ServiceRouteGetSchema'}
+                }
+            }
+        },
+        'patch': {
+            'tags': ['routes'],
+            'description': 'Update a route',
+            'parameters': [
+                {
+                    'name': 'route_uuid',
+                    'in': 'path',
+                    'type': 'string',
+                    'required': True
+                },
+                {
+                    'name': 'body',
+                    'in': 'body',
+                    'schema': {'$ref': '#/definitions/ServiceRoutePatchSchema'},
+                    'required': True
+                }
+            ],
+            'responses': {
+                '200': {
+                    'description': 'Route updated',
+                    'schema': {'$ref': '#/definitions/ServiceRouteGetSchema'}
                 }
             }
         }

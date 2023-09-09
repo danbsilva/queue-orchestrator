@@ -1,38 +1,33 @@
-from os import path
+import os
 from decouple import config as config_env
 
-BASE_DIR = path.dirname(path.realpath(__file__))
+BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 # APP
-DEBUG = config_env('DEBUG')
-FLASK_ENV = config_env('FLASK_ENV')
-FLASK_APP = config_env('FLASK_APP')
-APP_NAME = config_env('APP_NAME')
-APP_PORT = int(config_env('APP_PORT'))
-APP_HOST = config_env('APP_HOST')
-CONTAINER_NAME = config_env('CONTAINER_NAME')
+DEBUG = os.getenv("DEBUG")
+FLASK_ENV = os.getenv("FLASK_ENV")
+FLASK_APP = os.getenv("FLASK_APP")
+APP_NAME = os.getenv("APP_NAME")
+APP_PORT = int(os.getenv("APP_PORT"))
+APP_HOST = os.getenv("APP_HOST")
+CONTAINER_NAME =os.getenv("CONTAINER_NAME")
 
-# API GATEWAY
-API_GATEWAY_HOST = config_env('API_GATEWAY_HOST')
-
-# KEYS
-ALGORITHM = config_env('ALGORITHM')
-SECRET_KEY = config_env('SECRET_KEY')
 
 # DB
-SQLALCHEMY_DATABASE_URI = config_env('SQLALCHEMY_DATABASE_URI')
-BUNDLE_ERRORS = config_env('BUNDLE_ERRORS')
+SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI")
+BUNDLE_ERRORS = os.getenv("BUNDLE_ERRORS")
+SQLALCHEMY_TRACK_MODIFICATIONS = os.getenv("SQLALCHEMY_TRACK_MODIFICATIONS")
 
 # REDIS
-CACHE_TYPE = config_env('CACHE_TYPE')
-CACHE_REDIS_HOST = config_env('CACHE_REDIS_HOST')
-CACHE_REDIS_PORT = config_env('CACHE_REDIS_PORT')
-CACHE_REDIS_DB = config_env('CACHE_REDIS_DB')
-CACHE_REDIS_URL = config_env('CACHE_REDIS_URL')
-CACHE_DEFAULT_TIMEOUT = config_env('CACHE_DEFAULT_TIMEOUT')
+CACHE_TYPE = os.getenv("CACHE_TYPE")
+CACHE_REDIS_HOST = os.getenv("CACHE_REDIS_HOST")
+CACHE_REDIS_PORT = os.getenv("CACHE_REDIS_PORT")
+CACHE_REDIS_DB = os.getenv("CACHE_REDIS_DB")
+CACHE_REDIS_URL = os.getenv("CACHE_REDIS_URL")
+CACHE_DEFAULT_TIMEOUT = os.getenv("CACHE_DEFAULT_TIMEOUT")
 
 # KAFKA
-KAFKA_SERVER = config_env('KAFKA_SERVER')
+KAFKA_SERVER = os.getenv("KAFKA_SERVER")
 
 EXTENSIONS = [
     'src.routes:init_app',

@@ -1,14 +1,21 @@
-version: "3"
+version: "3.8"
 
+# Networks
 networks:
-  micro_network:
+  queue_orchestrator:
     external: true
+
+# Volumes
+volumes:
+  # DbAutomations
+  dbautomations_data:
+
 
 services:
 
   # Automations
-  dbautomations:
-    image: postgres
+  automations-db:
+    image: postgres:alpine
     container_name: dbautomations
     environment:
       POSTGRES_DB: automation
@@ -19,32 +26,42 @@ services:
     expose:
       - "5432"
     networks:
-      - micro_network
-    restart: always
+      - queue_orchestrator
+    depends_on:
+      gateway:
+        condition: service_healthy
+    volumes:
+      - dbautomations_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD", "psql", "automation", "-U", "admin" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: on-failure
 
   automations-service:
     build:
-      context: .
+      context: ./automation-service
       dockerfile: Dockerfile
     container_name: automations
     environment:
-      APP_PORT: 2002
+      APP_PORT: 80
     ports:
-      - '2002:2002'
+      - '2002:80'
     expose:
-      - "2002"
+      - "80"
     volumes:
-      - ./migrations:/app/migrations
-      - ./.env:/app/.env
-      - ./src:/app/src
-      - ./main.py:/app/main.py
+      - ./automation-service/:/app/
     depends_on:
-      - dbautomations
+      automations-db:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:80/health/" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
-      - micro_network
-    restart: always
-    #command: >
-    #  sh -c "flask db migrate && flask db upgrade && gunicorn -b :80 main:gunicorn_app"
-    command: >
-          sh -c "python main.py"
+      - queue_orchestrator
+    restart: on-failure
+    command: sh -c "gunicorn -b :80 main:main_app --workers 1 --threads 8 --timeout 0 --log-level debug --reload"
 

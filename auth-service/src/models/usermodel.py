@@ -5,7 +5,7 @@ from src.extensions.flask_sqlalchemy import db
 from src.providers.hash_provider import generate_password_hash
 
 
-class User(db.Model):
+class UserModel(db.Model):
 
     __tablename__ = 'users'
 
@@ -24,15 +24,6 @@ class User(db.Model):
     def __repr__(self):
         return '<User %r>' % self.name
 
-    def generate_uuid(self):
-        self.uuid = str(uuid4())
-
-    def generate_username(self):
-        self.username = self.uuid
-
-    def encode_password(self):
-        self.password = generate_password_hash(self.password)
-
     def to_json(self):
         return {
             'uuid': self.uuid,
@@ -43,3 +34,82 @@ class User(db.Model):
             'email_valid': self.email_valid,
             'is_admin': self.is_admin
         }
+
+
+    def generate_uuid(self):
+        self.uuid = str(uuid4())
+
+    def generate_username(self):
+        self.username = self.uuid
+
+    def encode_password(self):
+        self.password = generate_password_hash(self.password)
+
+
+    @staticmethod
+    def save(new_user):
+        user = UserModel(**new_user)
+
+        user.generate_uuid()
+        user.generate_username()
+        user.encode_password()
+
+        db.session.add(user)
+        db.session.commit()
+
+        return user
+
+    @staticmethod
+    def get_all():
+        return UserModel.query.all()
+
+    @staticmethod
+    def get_by_email(email):
+        return UserModel.query.filter_by(email=email).first()
+
+    @staticmethod
+    def get_by_uuid(uuid):
+        return UserModel.query.filter_by(uuid=uuid).first()
+
+    @staticmethod
+    def get_by_username(username):
+        return UserModel.query.filter_by(username=username).first()
+
+    @staticmethod
+    def update(user, data):
+        for key, value in data.items():
+            setattr(user, key, value)
+        db.session.commit()
+
+        return user
+
+    @staticmethod
+    def delete(user):
+        db.session.delete(user)
+        db.session.commit()
+
+    @staticmethod
+    def change_password(user, new_password):
+        user.password = new_password
+        user.encode_password()
+        db.session.commit()
+
+        return user
+
+    @staticmethod
+    def validate_email(user):
+        user.email_valid = True
+        db.session.commit()
+
+        return user
+
+    @staticmethod
+    def change_role(user):
+        if user.is_admin:
+            user.is_admin = False
+        else:
+            user.is_admin = True
+
+        db.session.commit()
+
+        return user

@@ -1,5 +1,6 @@
 const ID_RE = /(-)_(-)/;
 
+
 function moeda2float(moeda){
     if(moeda == '' || moeda == undefined){
         return 0;
@@ -8,6 +9,7 @@ function moeda2float(moeda){
     moeda = moeda.replace(",",".");
     return parseFloat(moeda);
 }
+
 
 function float2moeda(number, decimals, dec_point, thousands_sep) {
     if(decimals == undefined){
@@ -122,11 +124,59 @@ function formataMoedaPadrao(number, dec_point, thousands_sep) {
   return s.join(dec);
 }
 
-function sendNotification(message){
-    const t = document.querySelector(".toast-placement-ex");
+function highlightErrors(data) {
+    var message = '<ul>';
+    $(".input-error").removeClass('is-invalid')
+    if (data['responseJSON']){
+        for (const key in data['responseJSON']) {
+            const input = document.getElementById(data['responseJSON'][key][0]);
+            console.log(input);
+            input.classList.add('is-invalid');
+            message += '<li>'+data['responseJSON'][key][1]+'</li>';
+        }
+        message += '</ul>';
+
+    }else{
+        message = data['responseText'];
+    }
+    sendNotification(message, 'danger');
+  }
+
+function sendNotification(message, type) {
+    const t = document.querySelector(".toast");
     let c;
-    $(".toast-placement-ex .toast-body").html(message);
+    $(".toast .toast-body").html(message);
+    if (type == 'success'){
+        $(".toast").removeClass("bg-danger");
+        $(".toast").addClass("bg-success");
+    }else{
+        $(".toast").removeClass("bg-success");
+        $(".toast").addClass("bg-danger");
+    }
     (c = new bootstrap.Toast(t)).show()
+}
+
+function filterTable(inputId, tableId) {
+    var input, filter, table, tr, td, i, txtValue;
+    input = document.getElementById(inputId);
+    filter = input.value.toUpperCase();
+    table = document.getElementById(tableId);
+    tr = table.getElementsByTagName("tr");
+
+    for (i = 1; i < tr.length; i++) {
+            tr[i].style.display = "none"; // Oculta todas as linhas
+
+            for (j = 0; j < tr[i].getElementsByTagName("td").length; j++) {
+                td = tr[i].getElementsByTagName("td")[j];
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = ""; // Exibe a linha se houver correspondência
+                        break; // Sai do loop interno se encontrou correspondência
+                    }
+                }
+            }
+        }
 }
 
 function replaceTemplateIndex(value, index) {

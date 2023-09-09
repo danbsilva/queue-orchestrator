@@ -5,7 +5,7 @@ from src.extensions.flask_sqlalchemy import db
 
 
 class Automation(db.Model):
-    __tablename__ = 'automations'
+    __tablename__ = 'automations_'
 
     id = db.Column(db.Integer, primary_key=True, index=True)
     uuid = db.Column(db.String, nullable=False, default=lambda: str(uuid4()))
@@ -37,7 +37,7 @@ class Step(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, index=True)
     uuid = db.Column(db.String, nullable=False, default=lambda: str(uuid4()))
-    automation_id = db.Column(db.Integer, db.ForeignKey('automations.id'), nullable=False)
+    automation_id = db.Column(db.Integer, db.ForeignKey('automations_.id'), nullable=False)
     automation = db.relationship('Automation', back_populates='steps')
     name = db.Column(db.String, nullable=False)
     description = db.Column(db.String, nullable=False)
@@ -104,7 +104,7 @@ class Item(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, index=True)
     uuid = db.Column(db.String, nullable=False, default=lambda: str(uuid4()))
-    automation_id = db.Column(db.Integer, db.ForeignKey('automations.id'), nullable=False)
+    automation_id = db.Column(db.Integer, db.ForeignKey('automations_.id'), nullable=False)
     automation = db.relationship('Automation', back_populates='items')
     step_id = db.Column(db.Integer, db.ForeignKey('steps.id'), nullable=False)
     step = db.relationship('Step', back_populates='items')

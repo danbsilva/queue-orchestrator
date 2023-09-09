@@ -1,29 +1,25 @@
-from os import path
-from decouple import config as config_env
+import os
 
-BASE_DIR = path.dirname(path.realpath(__file__))
+BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 # APP
-DEBUG = eval(config_env('DEBUG').title())
-FLASK_ENV = config_env('FLASK_ENV')
-FLASK_APP = config_env('FLASK_APP')
-APP_PORT = int(config_env('APP_PORT'))
-APP_HOST = config_env('APP_HOST')
-CONTAINER_NAME = config_env('CONTAINER_NAME')
+DEBUG = int(os.getenv("DEBUG"))
+FLASK_ENV = os.getenv("FLASK_ENV")
+FLASK_APP = os.getenv("FLASK_APP")
+APP_NAME = os.getenv('APP_NAME')
+APP_PORT = int(os.getenv('APP_PORT'))
+APP_HOST = os.getenv('APP_HOST')
+CONTAINER_NAME = os.getenv('CONTAINER_NAME')
 
-# API GATEWAY
-API_GATEWAY_HOST = config_env('API_GATEWAY_HOST')
 
 # MAIL
-MAIL_SERVER = config_env('MAIL_SERVER')
-MAIL_PORT = config_env('MAIL_PORT')
-MAIL_USE_TLS = config_env('MAIL_USE_TLS')
-MAIL_USERNAME = config_env('MAIL_USERNAME')
-MAIL_PASSWORD = config_env('MAIL_PASSWORD')
-MAIL_DEFAULT_SENDER = config_env('MAIL_DEFAULT_SENDER')
+MAIL_SERVER = os.getenv('MAIL_SERVER')
+MAIL_PORT = os.getenv('MAIL_PORT')
+MAIL_USE_TLS = os.getenv('MAIL_USE_TLS')
+MAIL_USERNAME = os.getenv('MAIL_USERNAME')
+MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER')
 
-# KAFKA
-KAFKA_SERVER = config_env('KAFKA_SERVER')
 
 EXTENSIONS = [
     'src.extensions.mail:init_app'

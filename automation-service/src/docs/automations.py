@@ -1,5 +1,4 @@
-from src import schemas
-
+from src.schemas import automationschemas, stepschemas, fieldschemas, itemschemas
 
 
 def return_model_dict(schema):
@@ -14,6 +13,7 @@ def return_model_dict(schema):
 
 
 docs_endpoints = [
+    # Health
     {
         'endpoint': '/health/',
         'methods': [
@@ -24,14 +24,16 @@ docs_endpoints = [
             }
         ]
     },
+
+    # Automations
     {
         'endpoint': '/automations/',
         'methods': [
             {
             'POST': {
-                'request': return_model_dict(schemas.AutomationPostSchema()),
+                'request': return_model_dict(automationschemas.AutomationPostSchema()),
                 'response': {
-                    'automation': return_model_dict(schemas.AutomationGetSchema())
+                    'automation': return_model_dict(automationschemas.AutomationGetSchema())
                     }
                 }
             },
@@ -39,7 +41,7 @@ docs_endpoints = [
             'GET':
                 {
                     'response': {
-                        'automations': [return_model_dict(schemas.AutomationGetSchema())],
+                        'automations': [return_model_dict(automationschemas.AutomationGetSchema())],
                         'pagination': {
                             'total_pages':'total_pages',
                             'current_page': 'current_page',
@@ -60,9 +62,9 @@ docs_endpoints = [
         'methods': [
             {
             'PATCH': {
-                'request': return_model_dict(schemas.AutomationPatchSchema()),
+                'request': return_model_dict(automationschemas.AutomationPatchSchema()),
                 'response': {
-                    'automation': return_model_dict(schemas.AutomationGetSchema())
+                    'automation': return_model_dict(automationschemas.AutomationGetSchema())
                     }
                 }
             },
@@ -70,7 +72,7 @@ docs_endpoints = [
             'GET':
                 {
                     'response': {
-                        'automation': return_model_dict(schemas.AutomationGetSchema())
+                        'automation': return_model_dict(automationschemas.AutomationGetSchema())
                     }
                 }
             },
@@ -91,7 +93,7 @@ docs_endpoints = [
             'GET':
                 {
                     'response': {
-                        'automations': [return_model_dict(schemas.AutomationGetSchema())],
+                        'automations': [return_model_dict(automationschemas.AutomationGetSchema())],
                         'pagination': {
                             'total_pages':'total_pages',
                             'current_page': 'current_page',
@@ -107,19 +109,21 @@ docs_endpoints = [
             },
         ]
     },
+
+    # Owners
     {
         'endpoint': '/automations/<automation_uuid>/owners/',
         'methods': [
             {
                 'POST': {
-                'request': return_model_dict(schemas.OwnersPostSchema()),
+                'request': return_model_dict(automationschemas.OwnerPostSchema()),
                 'response': {
-                    'owners': return_model_dict(schemas.OwnersGetSchema())
+                    'owners': return_model_dict(automationschemas.OwnersGetSchema())
                     }
                 },
                 'GET':{
                     'response': {
-                        'owners': return_model_dict(schemas.OwnersGetSchema()),
+                        'owners': return_model_dict(automationschemas.OwnersGetSchema()),
                         'pagination': {
                             'total_pages': 'total_pages',
                             'current_page': 'current_page',
@@ -133,7 +137,7 @@ docs_endpoints = [
                     }
                 },
                 'DELETE':{
-                    'request': return_model_dict(schemas.OwnersDeleteSchema()),
+                    'request': return_model_dict(automationschemas.OwnerDeleteSchema()),
                     'response': {
                         'message': 'message'
                     }
@@ -141,14 +145,16 @@ docs_endpoints = [
             },
         ]
     },
+
+    # Steps
     {
         'endpoint': '/automations/<automation_uuid>/steps/',
         'methods': [
             {
             'POST': {
-                'request': return_model_dict(schemas.AutomationStepPostSchema()),
+                'request': return_model_dict(stepschemas.StepPostSchema()),
                 'response': {
-                    'step': return_model_dict(schemas.AutomationStepGetSchema())
+                    'step': return_model_dict(stepschemas.StepGetSchema())
                     }
                 }
             },
@@ -156,7 +162,7 @@ docs_endpoints = [
             'GET':
                 {
                     'response': {
-                        'steps': [return_model_dict(schemas.AutomationStepGetSchema())],
+                        'steps': [return_model_dict(stepschemas.StepGetSchema())],
                         'pagination': {
                             'total_pages':'total_pages',
                             'current_page': 'current_page',
@@ -177,9 +183,9 @@ docs_endpoints = [
         'methods': [
             {
                 'PATCH': {
-                    'request': return_model_dict(schemas.AutomationStepPatchSchema()),
+                    'request': return_model_dict(stepschemas.StepPatchSchema()),
                     'response': {
-                        'automation': return_model_dict(schemas.AutomationStepGetSchema())
+                        'automation': return_model_dict(stepschemas.StepGetSchema())
                     }
                 }
             },
@@ -187,7 +193,7 @@ docs_endpoints = [
                 'GET':
                     {
                         'response': {
-                            'automation': return_model_dict(schemas.AutomationStepGetSchema())
+                            'automation': return_model_dict(stepschemas.StepGetSchema())
                         }
                     }
             },
@@ -201,14 +207,16 @@ docs_endpoints = [
             }
         ]
     },
+
+    # Fields
     {
-        'endpoint': '/automations/<automation_uuid>/items/',
+        'endpoint': '/automations/steps/<step_uuid>/fields/',
         'methods': [
             {
                 'POST': {
-                    'request': return_model_dict(schemas.AutomationItemPostSchema()),
+                    'request': return_model_dict(fieldschemas.FieldPostSchema()),
                     'response': {
-                        'item': return_model_dict(schemas.AutomationItemGetSchema())
+                        'field': return_model_dict(fieldschemas.FieldGetSchema())
                     }
                 }
             },
@@ -216,7 +224,69 @@ docs_endpoints = [
                 'GET':
                     {
                         'response': {
-                            'items': [return_model_dict(schemas.AutomationItemGetSchema())],
+                            'fields': [return_model_dict(fieldschemas.FieldGetSchema())],
+                            'pagination': {
+                                'total_pages': 'total_pages',
+                                'current_page': 'current_page',
+                                'per_page': 'per_page',
+                                'total_items': 'total_items',
+                                'has_next': 'has_next',
+                                'has_prev': 'has_prev',
+                                'total_items_this_page': 'total_items_this_page',
+                                'offset': 'offset'
+                            }
+                        }
+                    }
+            }
+        ]
+    },
+    {
+        'endpoint': '/automations/steps/fields/<field_uuid>/',
+        'methods': [
+            {
+                'GET':
+                    {
+                        'response': {
+                            'field': return_model_dict(fieldschemas.FieldGetSchema())
+                        }
+                    }
+            },
+            {
+                'PATCH': {
+                    'request': return_model_dict(fieldschemas.FieldPatchSchema()),
+                    'response': {
+                        'field': return_model_dict(fieldschemas.FieldGetSchema())
+                    }
+                }
+            },
+            {
+                'DELETE':
+                    {
+                        'response': {
+                            'message': 'message'
+                        }
+                    }
+            }
+        ]
+    },
+
+    # Items
+    {
+        'endpoint': '/automations/<automation_uuid>/items/',
+        'methods': [
+            {
+                'POST': {
+                    'request': return_model_dict(itemschemas.ItemPostSchema()),
+                    'response': {
+                        'item': return_model_dict(itemschemas.ItemGetSchema())
+                    }
+                }
+            },
+            {
+                'GET':
+                    {
+                        'response': {
+                            'items': [return_model_dict(itemschemas.ItemGetSchema())],
                             'pagination': {
                                 'total_pages': 'total_pages',
                                 'current_page': 'current_page',
@@ -238,10 +308,25 @@ docs_endpoints = [
             {
                 'GET':{
                         'response': {
-                            'automation': return_model_dict(schemas.AutomationItemGetSchema())
+                            'automation': return_model_dict(itemschemas.ItemGetSchema())
                         }
                     }
-
+            },
+            {
+                'PATCH': {
+                    'request': return_model_dict(itemschemas.ItemPatchSchema()),
+                    'response': {
+                        'automation': return_model_dict(itemschemas.ItemGetSchema())
+                    }
+                }
+            },
+            {
+                'DELETE':
+                    {
+                        'response': {
+                            'message': 'message'
+                        }
+                    }
             }
         ]
     },
@@ -250,9 +335,9 @@ docs_endpoints = [
         'methods': [
             {
                 'POST': {
-                    'request': return_model_dict(schemas.AutomationItemPostSchema()),
+                    'request': return_model_dict(itemschemas.ItemPostSchema()),
                     'response': {
-                        'item': return_model_dict(schemas.AutomationItemGetSchema())
+                        'item': return_model_dict(itemschemas.ItemGetSchema())
                     }
                 }
             },
@@ -260,7 +345,7 @@ docs_endpoints = [
                 'GET':
                     {
                         'response': {
-                            'items': [return_model_dict(schemas.AutomationItemGetSchema())],
+                            'items': [return_model_dict(itemschemas.ItemGetSchema())],
                             'pagination': {
                                 'total_pages': 'total_pages',
                                 'current_page': 'current_page',
@@ -281,22 +366,24 @@ docs_endpoints = [
         'methods': [
             {
                 'PATCH': {
-                    'request': return_model_dict(schemas.AutomationItemUpdateStatusPatchSchema()),
+                    'request': return_model_dict(itemschemas.ItemUpdateStatusPatchSchema()),
                     'response': {
-                        'automation': return_model_dict(schemas.AutomationStepGetSchema())
+                        'automation': return_model_dict(stepschemas.StepGetSchema())
                     }
                 }
             },
         ]
     },
+
+    # Item Historic
     {
-        'endpoint': '/automations/items/<item_uuid>/history/',
+        'endpoint': '/automations/items/<item_uuid>/historic/',
         'methods': [
             {
                 'GET':
                     {
                         'response': {
-                            'items': [return_model_dict(schemas.AutomationItemHistoryGetSchema())],
+                            'items': [return_model_dict(itemschemas.ItemHistoricGetSchema())],
                             'pagination': {
                                 'total_pages': 'total_pages',
                                 'current_page': 'current_page',
@@ -357,6 +444,8 @@ def convert_to_swagger_dict(schema):
 
 
 paths = {
+
+    # Automations
     '/automations/': {
         'post': {
             'tags': ['automations'],
@@ -530,6 +619,8 @@ paths = {
             ]
         }
     },
+
+    # Owners
     '/automations/{automation_uuid}/owners/': {
         'post': {
             'tags': ['owners'],
@@ -547,7 +638,7 @@ paths = {
                     'name': 'body',
                     'in': 'body',
                     'schema': {
-                        '$ref': '#/definitions/OwnersPostSchema'
+                        '$ref': '#/definitions/OwnerPostSchema'
                     },
                     'required': True,
                     'description': 'Owner data'
@@ -614,7 +705,7 @@ paths = {
                     'name': 'body',
                     'in': 'body',
                     'schema': {
-                        '$ref': '#/definitions/OwnersDeleteSchema'
+                        '$ref': '#/definitions/OwnerDeleteSchema'
                     },
                     'required': True,
                     'description': 'Owner uuid'
@@ -637,6 +728,8 @@ paths = {
             ]
         }
     },
+
+    # Steps
     '/automations/{automation_uuid}/steps/': {
         'post': {
             'tags': ['steps'],
@@ -654,7 +747,7 @@ paths = {
                     'name': 'body',
                     'in': 'body',
                     'schema': {
-                        '$ref': '#/definitions/AutomationStepPostSchema'
+                        '$ref': '#/definitions/StepPostSchema'
                     },
                     'required': True,
                     'description': 'Step data'
@@ -664,7 +757,7 @@ paths = {
                 '200': {
                     'description': 'OK',
                     'schema': {
-                        '$ref': '#/definitions/AutomationStepGetSchema'
+                        '$ref': '#/definitions/StepGetSchema'
                     }
                 }
             },
@@ -693,7 +786,7 @@ paths = {
                 '200': {
                     'description': 'OK',
                     'schema': {
-                        '$ref': '#/definitions/AutomationStepsGetSchema'
+                        '$ref': '#/definitions/StepsGetSchema'
                     }
                 }
             },
@@ -724,7 +817,7 @@ paths = {
                 '200': {
                     'description': 'OK',
                     'schema': {
-                        '$ref': '#/definitions/AutomationStepGetSchema'
+                        '$ref': '#/definitions/StepGetSchema'
                     }
                 }
             },
@@ -752,7 +845,7 @@ paths = {
                     'name': 'body',
                     'in': 'body',
                     'schema': {
-                        '$ref': '#/definitions/AutomationStepPatchSchema'
+                        '$ref': '#/definitions/StepPatchSchema'
                     },
                     'required': True,
                     'description': 'Step data'
@@ -762,7 +855,7 @@ paths = {
                 '200': {
                     'description': 'OK',
                     'schema': {
-                        '$ref': '#/definitions/AutomationStepGetSchema'
+                        '$ref': '#/definitions/StepGetSchema'
                     }
                 }
             },
@@ -801,6 +894,175 @@ paths = {
             ]
         }
     },
+
+    # Fields
+    '/automations/steps/{step_uuid}/fields/': {
+        'post': {
+            'tags': ['fields'],
+            'summary': 'Create field',
+            'description': 'Create field',
+            'parameters': [
+                {
+                    'name': 'step_uuid',
+                    'in': 'path',
+                    'type': 'string',
+                    'required': True,
+                    'description': 'Step uuid'
+                },
+                {
+                    'name': 'body',
+                    'in': 'body',
+                    'schema': {
+                        '$ref': '#/definitions/FieldPostSchema'
+                    },
+                    'required': True,
+                    'description': 'Field data'
+                }
+            ],
+            'responses': {
+                '200': {
+                    'description': 'OK',
+                    'schema': {
+                        '$ref': '#/definitions/FieldGetSchema'
+                    }
+                }
+            },
+            'security': [
+                {
+                    'Authorization': [
+                        'automations'
+                    ]
+                }
+            ]
+        },
+        'get': {
+
+            'tags': ['fields'],
+            'summary': 'Get fields',
+            'description': 'Get fields',
+            'parameters': [
+                {
+                    'name': 'step_uuid',
+                    'in': 'path',
+                    'type': 'string',
+                    'required': True,
+                    'description': 'Step uuid'
+                }
+            ],
+            'responses': {
+                '200': {
+                    'description': 'OK',
+                    'schema': {
+                        '$ref': '#/definitions/FieldsGetSchema'
+                    }
+                }
+            },
+            'security': [
+                {
+                    'Authorization': [
+                        'automations'
+                    ]
+                }
+            ]
+        }
+    },
+    '/automations/steps/fields/{field_uuid}/': {
+        'get': {
+            'tags': ['fields'],
+            'summary': 'Get field',
+            'description': 'Get field',
+            'parameters': [
+                {
+                    'name': 'field_uuid',
+                    'in': 'path',
+                    'type': 'string',
+                    'required': True,
+                    'description': 'Field uuid'
+                }
+            ],
+            'responses': {
+                '200': {
+                    'description': 'OK',
+                    'schema': {
+                        '$ref': '#/definitions/FieldGetSchema'
+                    }
+                }
+            },
+            'security': [
+                {
+                    'Authorization': [
+                        'automations'
+                    ]
+                }
+            ]
+        },
+        'patch': {
+            'tags': ['fields'],
+            'summary': 'Update field',
+            'description': 'Update field',
+            'parameters': [
+                {
+                    'name': 'field_uuid',
+                    'in': 'path',
+                    'type': 'string',
+                    'required': True,
+                    'description': 'Field uuid'
+                },
+                {
+                    'name': 'body',
+                    'in': 'body',
+                    'schema': {
+                        '$ref': '#/definitions/FieldPatchSchema'
+                    },
+                    'required': True,
+                    'description': 'Field data'
+                }
+            ],
+            'responses': {
+                '200': {
+                    'description': 'OK',
+                    'schema': {
+                        '$ref': '#/definitions/FieldGetSchema'
+                    }
+                }
+            },
+            'security': [
+                {
+                    'Authorization': [
+                        'automations'
+                    ]
+                }
+            ]
+        },
+        'delete': {
+            'tags': ['fields'],
+            'summary': 'Delete field',
+            'description': 'Delete field',
+            'parameters': [
+                {
+                    'name': 'field_uuid',
+                    'in': 'path',
+                    'type': 'string',
+                    'required': True,
+                    'description': 'Field uuid'
+                }
+            ],
+            'responses': {
+                '200': {
+                    'description': 'OK'
+                }
+            },
+            'security': [
+                {
+                    'Authorization': [
+                        'automations'
+                    ]
+                }
+            ]
+        }
+    },
+
+    # Items
     '/automations/{automation_uuid}/items/': {
         'post': {
             'tags': ['items'],
@@ -818,7 +1080,7 @@ paths = {
                     'name': 'body',
                     'in': 'body',
                     'schema': {
-                        '$ref': '#/definitions/AutomationItemPostSchema'
+                        '$ref': '#/definitions/ItemPostSchema'
                     },
                     'required': True,
                     'description': 'Item data'
@@ -828,7 +1090,7 @@ paths = {
                 '200': {
                     'description': 'OK',
                     'schema': {
-                        '$ref': '#/definitions/AutomationItemPostSchema'
+                        '$ref': '#/definitions/ItemGetSchema'
                     }
                 }
             },
@@ -857,7 +1119,7 @@ paths = {
                 '200': {
                     'description': 'OK',
                     'schema': {
-                        '$ref': '#/definitions/AutomationItemsGetSchema'
+                        '$ref': '#/definitions/ItemsGetSchema'
                     }
                 }
             },
@@ -888,8 +1150,72 @@ paths = {
                 '200': {
                     'description': 'OK',
                     'schema': {
-                        '$ref': '#/definitions/AutomationItemGetSchema'
+                        '$ref': '#/definitions/ItemGetSchema'
                     }
+                }
+            },
+            'security': [
+                {
+                    'Authorization': [
+                        'automations'
+                    ]
+                }
+            ]
+        },
+        'patch': {
+            'tags': ['items'],
+            'summary': 'Update item',
+            'description': 'Update item',
+            'parameters': [
+                {
+                    'name': 'item_uuid',
+                    'in': 'path',
+                    'type': 'string',
+                    'required': True,
+                    'description': 'Item uuid'
+                },
+                {
+                    'name': 'body',
+                    'in': 'body',
+                    'schema': {
+                        '$ref': '#/definitions/ItemPatchSchema'
+                    },
+                    'required': True,
+                    'description': 'Item data'
+                }
+            ],
+            'responses': {
+                '200': {
+                    'description': 'OK',
+                    'schema': {
+                        '$ref': '#/definitions/ItemGetSchema'
+                    }
+                }
+            },
+            'security': [
+                {
+                    'Authorization': [
+                        'automations'
+                    ]
+                }
+            ]
+        },
+        'delete': {
+            'tags': ['items'],
+            'summary': 'Delete item',
+            'description': 'Delete item',
+            'parameters': [
+                {
+                    'name': 'item_uuid',
+                    'in': 'path',
+                    'type': 'string',
+                    'required': True,
+                    'description': 'Item uuid'
+                }
+            ],
+            'responses': {
+                '200': {
+                    'description': 'OK'
                 }
             },
             'security': [
@@ -918,7 +1244,7 @@ paths = {
                     'name': 'body',
                     'in': 'body',
                     'schema': {
-                        '$ref': '#/definitions/AutomationItemPostSchema'
+                        '$ref': '#/definitions/ItemPostSchema'
                     },
                     'required': True,
                     'description': 'Item data'
@@ -928,7 +1254,7 @@ paths = {
                 '200': {
                     'description': 'OK',
                     'schema': {
-                        '$ref': '#/definitions/AutomationItemGetSchema'
+                        '$ref': '#/definitions/ItemGetSchema'
                     }
                 }
             },
@@ -957,7 +1283,7 @@ paths = {
                 '200': {
                     'description': 'OK',
                     'schema': {
-                        '$ref': '#/definitions/AutomationItemsGetSchema'
+                        '$ref': '#/definitions/ItemsGetSchema'
                     }
                 }
             },
@@ -987,7 +1313,7 @@ paths = {
                     'name': 'body',
                     'in': 'body',
                     'schema': {
-                        '$ref': '#/definitions/AutomationItemUpdateStatusPatchSchema'
+                        '$ref': '#/definitions/ItemUpdateStatusPatchSchema'
                     },
                     'required': True,
                     'description': 'Item status data (values: pending, running, finished, failed, canceled, deleted, paused)'
@@ -997,7 +1323,7 @@ paths = {
                 '200': {
                     'description': 'OK',
                     'schema': {
-                        '$ref': '#/definitions/AutomationItemGetSchema'
+                        '$ref': '#/definitions/ItemGetSchema'
                     }
                 }
             },
@@ -1010,7 +1336,9 @@ paths = {
             ]
         }
     },
-    '/automations/items/{item_uuid}/history/': {
+
+    # Item historic
+    '/automations/items/{item_uuid}/historic/': {
         'get': {
             'tags': ['history'],
             'summary': 'Get item history',
@@ -1028,7 +1356,7 @@ paths = {
                 '200': {
                     'description': 'OK',
                     'schema': {
-                        '$ref': '#/definitions/AutomationItemHistoryGetSchema'
+                        '$ref': '#/definitions/ItemHistoricGetSchema'
                     }
                 }
             },
@@ -1044,8 +1372,9 @@ paths = {
 }
 
 definitions = {
+
     ### Automations ###
-    'AutomationGetSchema': convert_to_swagger_dict(schemas.AutomationGetSchema()),
+    'AutomationGetSchema': convert_to_swagger_dict(automationschemas.AutomationGetSchema()),
     'AutomationsGetSchema': {
         'type': 'object',
         'properties': {
@@ -1057,21 +1386,10 @@ definitions = {
             }
         }
     },
-    'AutomationPostSchema': convert_to_swagger_dict(schemas.AutomationPostSchema()),
-    'AutomationPatchSchema': convert_to_swagger_dict(schemas.AutomationPatchSchema()),
+    'AutomationPostSchema': convert_to_swagger_dict(automationschemas.AutomationPostSchema()),
+    'AutomationPatchSchema': convert_to_swagger_dict(automationschemas.AutomationPatchSchema()),
 
     ### Owners ###
-    'OwnersPostSchema': {
-        'type': 'object',
-        'properties': {
-            'owners': {
-                'type': 'array',
-                'items': {
-                   '$ref': '#/definitions/OwnerGetSchema'
-                }
-            }
-        }
-    },
     'OwnersGetSchema': {
         'type': 'object',
         'properties': {
@@ -1083,18 +1401,9 @@ definitions = {
             }
         }
     },
-    'OwnersDeleteSchema': {
-        'type': 'object',
-        'properties': {
-            'owners': {
-                'type': 'array',
-                'items': {
-                    '$ref': '#/definitions/OwnerGetSchema'
-                }
-            }
-        }
-    },
-    'OwnerGetSchema': convert_to_swagger_dict(schemas.OwnerGetSchema()),
+    'OwnerDeleteSchema': convert_to_swagger_dict(automationschemas.OwnerDeleteSchema()),
+    'OwnerGetSchema': convert_to_swagger_dict(automationschemas.OwnerGetSchema()),
+    'OwnerPostSchema': convert_to_swagger_dict(automationschemas.OwnerPostSchema()),
     'OwnersResponseSchema': {
         'type': 'object',
         'properties': {
@@ -1121,38 +1430,55 @@ definitions = {
     },
 
     ### Steps ###
-    'AutomationStepPostSchema': convert_to_swagger_dict(schemas.AutomationStepPostSchema()),
-    'AutomationStepGetSchema': convert_to_swagger_dict(schemas.AutomationStepGetSchema()),
-    'AutomationStepsGetSchema': {
+    'StepPostSchema': convert_to_swagger_dict(stepschemas.StepPostSchema()),
+    'StepGetSchema': convert_to_swagger_dict(stepschemas.StepGetSchema()),
+    'StepsGetSchema': {
         'type': 'object',
         'properties': {
             'steps': {
                 'type': 'array',
                 'items': {
-                    '$ref': '#/definitions/AutomationStepGetSchema'
+                    '$ref': '#/definitions/StepGetSchema'
                 }
             }
         }
     },
-    'AutomationStepPatchSchema': convert_to_swagger_dict(schemas.AutomationStepPatchSchema()),
+    'StepPatchSchema': convert_to_swagger_dict(stepschemas.StepPatchSchema()),
+
+    ### Fields ###
+    'FieldPostSchema': convert_to_swagger_dict(fieldschemas.FieldPostSchema()),
+    'FieldGetSchema': convert_to_swagger_dict(fieldschemas.FieldGetSchema()),
+    'FieldsGetSchema': {
+        'type': 'object',
+        'properties': {
+            'fields': {
+                'type': 'array',
+                'items': {
+                    '$ref': '#/definitions/FieldGetSchema'
+                }
+            }
+        }
+    },
+    'FieldPatchSchema': convert_to_swagger_dict(fieldschemas.FieldPatchSchema()),
 
     ### Items ###
-    'AutomationItemPostSchema': convert_to_swagger_dict(schemas.AutomationItemPostSchema()),
-    'AutomationItemUpdateStatusPatchSchema': convert_to_swagger_dict(schemas.AutomationItemUpdateStatusPatchSchema()),
-    'AutomationItemGetSchema': convert_to_swagger_dict(schemas.AutomationItemGetSchema()),
-    'AutomationItemWithoutStepsGetSchema': convert_to_swagger_dict(schemas.AutomationItemWithoutStepsGetSchema()),
-    'AutomationItemsGetSchema': {
+    'ItemPostSchema': convert_to_swagger_dict(itemschemas.ItemPostSchema()),
+    'ItemUpdateStatusPatchSchema': convert_to_swagger_dict(itemschemas.ItemUpdateStatusPatchSchema()),
+    'ItemGetSchema': convert_to_swagger_dict(itemschemas.ItemGetSchema()),
+    'ItemWithoutStepsGetSchema': convert_to_swagger_dict(itemschemas.ItemWithoutStepsGetSchema()),
+    'ItemsGetSchema': {
         'type': 'object',
         'properties': {
             'items': {
                 'type': 'array',
                 'items': {
-                    '$ref': '#/definitions/AutomationItemWithoutStepsGetSchema'
+                    '$ref': '#/definitions/ItemGetSchema'
                 }
             }
         }
     },
-    'AutomationItemHistoryGetSchema': convert_to_swagger_dict(schemas.AutomationItemHistoryGetSchema()),
+    'ItemPatchSchema': convert_to_swagger_dict(itemschemas.ItemPatchSchema()),
+    'ItemHistoricGetSchema': convert_to_swagger_dict(itemschemas.ItemHistoricGetSchema()),
 
     ### Messages ###
     'MessageSchema': {

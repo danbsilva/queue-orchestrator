@@ -1,14 +1,19 @@
-version: "3"
+version: "3.8"
 
+# Networks
 networks:
-  micro_network:
+  queue_orchestrator:
     external: true
+
+volumes:
+  # DbServices
+  dbservices_data:
 
 services:
 
-  # Services
-  dbservices:
-    image: postgres
+  # Services and Gateway
+  gateway-db:
+    image: postgres:alpine
     container_name: dbservices
     environment:
       POSTGRES_DB: services
@@ -19,12 +24,24 @@ services:
     expose:
       - "5432"
     networks:
-      - micro_network
-    restart: always
+      - queue_orchestrator
+    depends_on:
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - dbservices_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD", "psql", "services", "-U", "admin" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: on-failure
 
-  api-gateway:
+  gateway:
     build:
-      context: .
+      context: gateway
       dockerfile: Dockerfile
     container_name: gateway
     environment:
@@ -34,17 +51,16 @@ services:
     expose:
       - "2000"
     volumes:
-      - ./migrations:/app/migrations
-      - ./.env:/app/.env
-      - ./src:/app/src
-      - ./main.py:/app/main.py
+      - ./gateway/:/app/
     depends_on:
-      - dbservices
+      gateway-db:
+        condition: service_healthy
     networks:
-      - micro_network
-    restart: always
-    command: >
-      sh -c "flask db migrate && flask db upgrade && gunicorn -b :80 main:gunicorn_app"
-    #command: >
-    #      sh -c "python main.py"
-
+      - queue_orchestrator
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:2000/health/" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: on-failure
+    command: sh -c "gunicorn -b :2000 main:main_app --workers 1 --threads 8 --timeout 0 --log-level debug --reload"

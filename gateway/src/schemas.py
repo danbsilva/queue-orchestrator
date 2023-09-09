@@ -1,6 +1,23 @@
 from marshmallow import Schema, fields, validate
 from marshmallow.fields import Nested
 
+class UserPostSchema(Schema):
+    username = fields.String(required=True, validate=validate.Length(min=1, max=100))
+    password = fields.String(required=True, validate=validate.Length(min=1, max=100))
+    is_admin = fields.Boolean(required=True)
+
+    class Meta:
+        ordered = True
+
+
+class UserGetSchema(Schema):
+    uuid = fields.String(required=True)
+    username = fields.String(required=True)
+    is_admin = fields.Boolean(required=True)
+
+    class Meta:
+        ordered = True
+
 
 class ServicePostSchema(Schema):
     service_name = fields.String(required=True, validate=validate.Length(min=1, max=100))

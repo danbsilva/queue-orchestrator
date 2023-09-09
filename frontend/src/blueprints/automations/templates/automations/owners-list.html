@@ -1,43 +1,34 @@
 <div class="card-body">
     <div id="automations" class="row mb-4">
         <div class="table-responsive">
-            <table class="table align-middle table-nowrap table-hover" id="table-steps">
+            <table class="table align-middle table-nowrap table-hover" id="table-owners">
                 <thead class="">
                     <tr>
                         <th hidden>UUID</th>
                         <th>Nome</th>
-                        <th>Descrição</th>
-                        <th>Etapa</th>
-                        <th>Tópico</th>
-                        <th>Nr.Tentativas</th>
+                        <th>Email</th>
                         <th class="text-end">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for step in steps %}
+                    {% for owner in owners %}
                     <tr>
-                        <td hidden>{{step.uuid }}</td>
-                        <td>{{step.name | upper }}</td>
-                        <td>{{step.description | upper}}</td>
-                        <td>{{step.step | upper }}</td>
-                        <td>{{step.topic | replace(automation.acronym + '_', '') | upper }}</td>
-                        <td>{{step.try_count | upper }}</td>
+                        <td hidden>{{owner.uuid }}</td>
+                        <td>{{owner.name }}</td>
+                        <td>{{owner.email }}</td>
                         <td class="text-end">
-                            <a href="{{url_for('automations.view_step', uuid=step.uuid)}}"
-                               id="{{step.uuid}}" type="button"
-                               class="btn p-0 text-primary pull-up-full">
-                                <i class="bx bx-xs bx-show"></i>
-                            </a>
-                            <a href="javascript:void(0);" id="{{step.uuid}}"
-                               data-automation="{{ automation.uuid }}" type="button"
-                               class="btn p-0 text-info pull-up-full editstep">
-                                <i class="bx bx-xs bx-edit"></i>
-                            </a>
-                            <a href="javascript:void(0);" id="{{step.uuid}}"
-                               data-id="{{step.name}}" type="button"
-                               class="btn p-0 text-danger pull-up-full a-delete-step">
-                                <i class="bx bx-xs bx-trash"></i>
-                            </a>
+                            {% if session['is_admin'] %}
+                                <a href="javascript:void(0);"
+                                   id="{{owner.uuid}}"
+                                   data-id="{{owner.name}}"
+                                   data-uuid="{{owner.uuid}}"
+                                   data-name="{{owner.name}}"
+                                   data-email="{{owner.email}}"
+                                   type="button"
+                                   class="btn p-0 text-danger pull-up-full a-delete-step">
+                                    <i class="bx bx-xs bx-trash"></i>
+                                </a>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
@@ -96,17 +87,24 @@
         })
     });
 
-    $(".a-delete-step").click(function (e) {
+     $(".a-delete-step").click(function (e) {
         e.preventDefault();
         var id = $(this).attr("id");
-        var step = $(this).attr("data-id");
+        var owner = $(this).attr("data-id");
+        var owner_uuid = $(this).attr("data-uuid");
+        var owner_name = $(this).attr("data-name");
+        var owner_email = $(this).attr("data-email");
         var automation_uuid = '{{ automation.uuid }}';
 
         $('#delete').attr("data-id", "div-" + id);
-        $('#delete').addClass('deletestep');
+        $('#delete').attr("data-uuid", owner_uuid);
+        $('#delete').attr("data-name", owner_name);
+        $('#delete').attr("data-email", owner_email);
+
+        $('#delete').addClass('deleteowner');
         $('#delete').attr("data-automation", automation_uuid);
 
-        $('.modal-body').html('Deseja realmente excluir a etapa <b>' + step + '</b>?');
+        $('.modal-body').html('Deseja realmente excluir a owner <b>' + owner + '</b>?');
         $('#confirmDelete').modal('show');
     });
 </script>

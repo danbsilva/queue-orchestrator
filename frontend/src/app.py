@@ -12,7 +12,7 @@ settings = os.path.join(os.path.dirname(__file__), 'settings.py')
 
 
 def minimal_app():
-    app = Flask(__name__)
+    app = Flask(config_env('APP_NAME'))
     app.config.from_pyfile(settings)
     config.init_app(app=app)
     return app
@@ -21,9 +21,14 @@ def minimal_app():
 def create_app():
     app = minimal_app()
 
+    # Redirect to webui
     @app.route('/', methods=['GET'])
+    @app.route('/webui/', methods=['GET'])
+    @app.route('/webui', methods=['GET'])
+    @app.route('/auth/', methods=['GET'])
+    @app.route('/auth', methods=['GET'])
     def index():
-        return redirect('/api/docs')
+        return redirect('/webui/home')
 
     @app.route('/health/', methods=['GET'])
     def health():
@@ -42,7 +47,7 @@ def create_app():
 
     @app.after_request
     def register_request_log(response):
-        if request.endpoint == 'health':
+        if 'health' in request.endpoint or 'static' in request.url_rule.rule or 'js' in request.url_rule.rule:
             return response
 
         payload = {

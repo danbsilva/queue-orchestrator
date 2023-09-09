@@ -70,7 +70,7 @@
           <ul id="lista" class="menu-inner py-1">
             <!-- Dashboard -->
             <li class="menu-item index">
-              <a href="{{url_for('webui.index')}}" class="menu-link">
+              <a href="{{url_for('webui.home')}}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-home-circle"></i>
                 <div data-i18n="Analytics">Home</div>
               </a>
@@ -78,55 +78,24 @@
 
             <!-- Cadastros -->
 
-            <li class="menu-header small text-uppercase">
-              <span class="menu-header-text">Cadastro</span>
-            </li>
-             <li class="menu-item clientes">
-              <a href="{{url_for('webui.clientes')}}" class="menu-link">
+             <li class="menu-item automations">
+              <a href="{{url_for('automations.automations')}}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-dock-top"></i>
-                <div data-i18n="Account Settings">Clientes</div>
-              </a>
-            </li>
-            <li class="menu-item loteadores">
-              <a href="{{url_for('webui.loteadores')}}" class="menu-link loteador">
-                <i class="menu-icon tf-icons bx bx-dock-top"></i>
-                <div data-i18n="Account Settings">Loteadores</div>
-              </a>
-            </li>
-            <li class="menu-item loteamentos">
-              <a href="{{url_for('webui.loteamentos')}}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-dock-top"></i>
-                <div data-i18n="Account Settings">Loteamentos</div>
-              </a>
-            </li>
-            <li class="menu-item lotes">
-              <a href="{{url_for('webui.lotes')}}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-dock-top"></i>
-                <div data-i18n="Account Settings">Lotes</div>
+                <div data-i18n="Account Settings">Automações</div>
               </a>
             </li>
 
-            <!-- Orçamentos -->
-            <li class="menu-header small text-uppercase"><span class="menu-header-text">Orçamentos</span></li>
+            <!-- Administração -->
+            <li class="menu-header small text-uppercase"><span class="menu-header-text">Administração</span></li>
 
             <!-- Cards -->
             <li class="menu-item orcamentos">
-              <a href="{{url_for('webui.orcamentos')}}" class="menu-link">
+              <a href="#" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-collection"></i>
-                <div data-i18n="Basic">Orçamentos</div>
+                <div data-i18n="Basic">Usuários</div>
               </a>
             </li>
 
-            <!-- Ordens de Serviços -->
-            <li class="menu-header small text-uppercase"><span class="menu-header-text">Ordens de Serviços</span></li>
-
-            <!-- Forms -->
-            <li class="menu-item ordens-servicos">
-              <a href="{{url_for('webui.ordens_servicos')}}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-collection"></i>
-                <div data-i18n="Basic">Ordens de Serviços</div>
-              </a>
-            </li>
           </ul>
         </aside>
         <!-- / Menu -->

@@ -1,18 +1,14 @@
 from src import resources
 
 
-class AutomationRoutes:
+class StepRoutes:
 
     def __init__(self, api):
 
-        # Endpoints for automations
-        api.add_resource(resources.AutomationsResource, '/',
+        # Endpoints for steps
+        api.add_resource(resources.StepsResource, '/<automation_uuid>/steps/',
                          methods=['POST', 'GET'])
-        api.add_resource(resources.AutomationResource, '/<automation_uuid>/',
+        api.add_resource(resources.StepResource, '/steps/<step_uuid>/',
                          methods=['GET', 'PATCH', 'DELETE'])
-        api.add_resource(resources.AutomationMeResource, '/me/',
-                         methods=['GET'])
-        api.add_resource(resources.OwnersByAutomationResource, '/<automation_uuid>/owners/',
-                         methods=['POST', 'GET', 'DELETE'])
 
 

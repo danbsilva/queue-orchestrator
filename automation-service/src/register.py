@@ -18,7 +18,7 @@ def filter_endpoint(endpoint_path, method, schema):
     else:
         return {}
 
-def register_service(app):
+def service(app):
     with app.app_context():
         service_name = app.name
         service_host = f'http://{config_env("CONTAINER_NAME")}:{config_env("APP_PORT")}'

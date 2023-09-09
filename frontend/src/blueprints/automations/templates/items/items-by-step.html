@@ -25,8 +25,9 @@
             <div class="row">
                 <div class="col-lg-8">
                     <label class="col-form-label">Itens por página</label>
-                    <select class="form-select select2" id="item-per-page" data-step="{{ step.uuid }}" style="max-width:110px;">
+                    <select class="form-select select2" id="item-per-page-by-step" data-step="{{ step.uuid }}" style="max-width:110px;">
                         <option value="10" selected>10</option>
+                        <option value="25">25</option>
                         <option value="50">50</option>
                         <option value="100">100</option>
                     </select>
@@ -46,7 +47,7 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
-        per_page = $('#item-per-page').children("option:selected").val();
+        per_page = $('#item-per-page-by-step').children("option:selected").val();
         step_uuid = '{{ step.uuid }}';
         loadPageItemsByStep(step_uuid, 1, per_page);
     });

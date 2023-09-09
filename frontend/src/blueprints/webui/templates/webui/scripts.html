@@ -35,13 +35,8 @@
 
     <!-- Pages JS -->
     <script src="{{url_for('webui.static', filename='assets/js/pages/form-advanced.init.js')}}"></script>
-    <script src="{{url_for('webui.static', filename='assets/js/pages/loteador.js')}}"></script>
-    <script src="{{url_for('webui.static', filename='assets/js/pages/loteamento.js')}}"></script>
-    <script src="{{url_for('webui.static', filename='assets/js/pages/lote.js')}}"></script>
-    <script src="{{url_for('webui.static', filename='assets/js/pages/cliente.js')}}"></script>
-    <script src="{{url_for('webui.static', filename='assets/js/pages/orcamento.js')}}"></script>
-    <script src="{{url_for('webui.static', filename='assets/js/pages/ordem_servico.js')}}"></script>
-
+    <script src="{{url_for('webui.static', filename='assets/js/pages/automation.js')}}"></script>
+    <script src="{{url_for('webui.static', filename='assets/js/pages/auth.js')}}"></script>
 
 
     <script async defer src="https://buttons.github.io/buttons.js"></script>
@@ -64,4 +59,15 @@
                 },
             }
         });
+
+        $('.layout-page').on('keyup', '.input-error', function(){
+            if ($(this).val() != ''){
+                $(this).removeClass('is-invalid');
+                $(this).addClass('is-valid');
+            }else{
+                $(this).removeClass('is-valid');
+                $(this).addClass('is-invalid');
+            }
+        });
+
     </script>

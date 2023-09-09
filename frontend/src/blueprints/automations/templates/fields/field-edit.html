@@ -1,4 +1,4 @@
-<form id="NewFieldForm" role="application" novalidate="novalidate", data-step="{{ step.uuid }}" data-automation="{{ automation.uuid }}">
+<form id="UpdateFieldForm" role="application" novalidate="novalidate", data-step="{{ step.uuid }}" data-automation="{{ automation.uuid }}">
     {{ form.csrf_token() }}
     {{ form.uuid() }}
     {% include 'fields/field-form.html' %}

@@ -6,7 +6,7 @@ from src import app, kafka, register, callbacks
 main_app = app.create_app()
 
 # Register service in API Gateway
-register.register_service(app=main_app)
+register.service(app=main_app)
 
 # Thread to consumer topic PROCESSED_ITEMS
 Thread(target=kafka.kafka_consumer, args=(main_app, config_env('TOPIC_PROCESSED_ITEMS'), callbacks.items_processed,)).start()

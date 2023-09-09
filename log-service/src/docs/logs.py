@@ -1,4 +1,4 @@
-from src import schemas
+from src.schemas import serviceschemas, requestschemas
 
 
 
@@ -29,9 +29,9 @@ docs_endpoints = [
         'methods': [
             {
             'POST': {
-                'request': return_model_dict(schemas.ServiceLogPostSchema()),
+                'request': return_model_dict(serviceschemas.ServicePostSchema()),
                 'response': {
-                    'log': return_model_dict(schemas.ServiceLogGetSchema())
+                    'log': return_model_dict(serviceschemas.ServiceGetSchema())
                     }
                 }
             },
@@ -39,7 +39,7 @@ docs_endpoints = [
             'GET':
                 {
                     'response': {
-                        'logs': [return_model_dict(schemas.ServiceLogGetSchema())],
+                        'logs': [return_model_dict(serviceschemas.ServiceGetSchema())],
                         'pagination': {
                             'total_pages':'total_pages',
                             'current_page': 'current_page',
@@ -60,9 +60,9 @@ docs_endpoints = [
         'methods': [
             {
             'POST': {
-                'request': return_model_dict(schemas.RequestLogPostSchema()),
+                'request': return_model_dict(requestschemas.RequestPostSchema()),
                 'response': {
-                    'log': return_model_dict(schemas.RequestLogGetSchema())
+                    'log': return_model_dict(requestschemas.RequestGetSchema())
                     }
                 }
             },
@@ -70,7 +70,7 @@ docs_endpoints = [
             'GET':
                 {
                     'response': {
-                        'logs': [return_model_dict(schemas.RequestLogGetSchema())],
+                        'logs': [return_model_dict(requestschemas.RequestGetSchema())],
                         'pagination': {
                             'total_pages':'total_pages',
                             'current_page': 'current_page',
@@ -234,10 +234,10 @@ paths = {
 }
 
 definitions = {
-    'ServiceLogPostSchema': convert_to_swagger_dict(schemas.ServiceLogPostSchema()),
-    'ServiceLogGetSchema': convert_to_swagger_dict(schemas.ServiceLogGetSchema()),
-    'RequestLogPostSchema': convert_to_swagger_dict(schemas.RequestLogPostSchema()),
-    'RequestLogGetSchema': convert_to_swagger_dict(schemas.RequestLogGetSchema()),
+    'ServiceLogPostSchema': convert_to_swagger_dict(serviceschemas.ServicePostSchema()),
+    'ServiceLogGetSchema': convert_to_swagger_dict(serviceschemas.ServiceGetSchema()),
+    'RequestLogPostSchema': convert_to_swagger_dict(requestschemas.RequestPostSchema()),
+    'RequestLogGetSchema': convert_to_swagger_dict(requestschemas.RequestGetSchema()),
     'MessageSchema': {
         'type': 'object',
         'properties': {

@@ -11,4 +11,4 @@ RUN pip install --upgrade pip setuptools wheel
 RUN pip install --no-cache-dir -r requirements.txt
 RUN chmod +x entrypoint.sh
 
-CMD ["sh", "entrypoint.sh"]
+#CMD ["sh", "entrypoint.sh"]

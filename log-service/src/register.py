@@ -1,8 +1,8 @@
-from decouple import config as config_env
+import os
 from threading import Thread
 
-from src import kafka
 from src.docs import logs
+from src.services.kafkaservice import KafkaService
 
 def filter_endpoint(endpoint_path, method, schema):
     filtered_endpoints = list(filter(lambda x: x['endpoint'] == endpoint_path, logs.docs_endpoints))
@@ -19,10 +19,10 @@ def filter_endpoint(endpoint_path, method, schema):
     else:
         return {}
 
-def register_service(app):
+def service(app):
     with app.app_context():
         service_name = app.name
-        service_host = f'http://{config_env("CONTAINER_NAME")}:{config_env("APP_PORT")}'
+        service_host = f'http://{os.getenv("CONTAINER_NAME")}:{os.getenv("APP_PORT")}'
         routes = register_routes(app)
 
         data = {
@@ -30,9 +30,7 @@ def register_service(app):
             'service_host': service_host,
             'routes': routes
         }
-
-        Thread(target=kafka.kafka_producer, args=(config_env('TOPIC_SERVICES_REGISTER'), app.name, data, )).start()
-
+        Thread(target=KafkaService().producer, args=(os.getenv('TOPIC_SERVICES_REGISTER'), os.getenv('APP_NAME'), data,)).start()
 
 def register_routes(app):
     routes = extract_routes(app)
@@ -50,7 +48,6 @@ def register_routes(app):
         routes_list.append(data)
 
     return routes_list
-
 
 def extract_routes(app):
     routes = []

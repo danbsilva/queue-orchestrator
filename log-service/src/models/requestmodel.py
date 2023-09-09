@@ -4,7 +4,7 @@ from uuid import uuid4
 from src.extensions.flask_sqlalchemy import db
 
 
-class RequestLogModel(db.Model):
+class RequestModel(db.Model):
     __tablename__ = 'requests_logs'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -34,5 +34,13 @@ class RequestLogModel(db.Model):
         }
 
     @staticmethod
+    def save(request_log):
+        request_log = RequestModel(**request_log)
+        db.session.add(request_log)
+        db.session.commit()
+        return request_log
+
+
+    @staticmethod
     def get_all():
-        return RequestLogModel.query.all()
+        return RequestModel.query.all()

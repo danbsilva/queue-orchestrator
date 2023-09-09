@@ -2,9 +2,10 @@ import sys
 
 from src.extensions.mail import mail
 from flask_mail import Message
-from src import logging
+from src.logging import Logger
+from src import messages
 
-__module_name__ = 'src.mail'
+__module_name__ = 'src.callbacks'
 
 
 def send_mail(app, key, msg):
@@ -18,9 +19,11 @@ def send_mail(app, key, msg):
                           subject=subject)
         try:
             mail.send(message)
-            logging.send_log_kafka('INFO', __module_name__, 'send_mail',
-                                   f'Mail sent to {recipient}', msg["transaction_id"])
+            Logger().dispatch('INFO', __module_name__, 'send_mail',
+                                    messages.MAIL_SENT.format(recipient),
+                                    msg["transaction_id"])
         except Exception as e:
-            logging.send_log_kafka('EXCEPTION', __module_name__, 'send_mail',
-                                   f'It was not possible to send mail to {recipient}: {e}', msg["transaction_id"])
+            Logger().dispatch('ERROR', __module_name__, 'send_mail',
+                                    messages.MAIL_NOT_SENT.format(recipient, e.args[0]),  
+                                    msg["transaction_id"])
             sys.exit(1)

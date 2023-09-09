@@ -1,24 +1,27 @@
-from decouple import config as config_env
+import os
+from time import sleep
+from dotenv import load_dotenv
 
-from src import kafka, callbacks, register
-from src import app
-from threading import Thread
 
+# Load shared  and project variables
+load_dotenv('shared.env')
+load_dotenv('.env')
+
+
+from src import app, register, threads
+
+# Return Flask app
 main_app = app.create_app()
 
 # Register service in API Gateway
-register.register_service(app=main_app)
+register.service(app=main_app)
 
-# Thread to consumer topic SERVICES LOGS
-Thread(target=kafka.kafka_consumer, args=(main_app, config_env('TOPIC_SERVICES_LOGS'), callbacks.save_service_log,)).start()
-
-# Thread to consumer topic REQUESTS LOGS
-Thread(target=kafka.kafka_consumer, args=(main_app, config_env('TOPIC_REQUESTS_LOGS'), callbacks.save_request_log,)).start()
-
+# Execute threads
+threads.execute(app=main_app)
 
 if __name__ == '__main__':
 
-    host = config_env("APP_HOST")
-    port = config_env("APP_PORT")
-    debug = config_env("DEBUG")
+    host = os.getenv("APP_HOST")
+    port = os.getenv("APP_PORT")
+    debug = os.getenv("DEBUG")
     #app.run(host=host, port=port, debug=debug, use_reloader=debug)

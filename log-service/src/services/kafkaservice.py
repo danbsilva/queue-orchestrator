@@ -1,5 +1,5 @@
 import json
-from decouple import config as config_env
+import os
 from time import sleep
 
 from kafka import KafkaProducer, KafkaConsumer
@@ -9,7 +9,7 @@ from kafka.errors import KafkaError
 class KafkaService:
 
     default_config = {
-        'bootstrap_servers': config_env('KAFKA_SERVER'),
+        'bootstrap_servers': os.getenv('KAFKA_SERVER'),
     }
 
     config_producer = {
@@ -17,12 +17,13 @@ class KafkaService:
     }
 
     config_consumer = {
-        'group_id': config_env('APP_NAME')
+        'group_id': 'logs_service_group',
+        'auto_offset_reset': 'earliest'
     }
 
     def is_broker_available(self):
         try:
-            KafkaConsumer(bootstrap_servers=config_env('KAFKA_SERVER'))
+            KafkaConsumer(bootstrap_servers=os.getenv('KAFKA_SERVER'))
             return True
         except KafkaError:
             return False
@@ -49,7 +50,7 @@ class KafkaService:
             kafka_consumer.subscribe([topic])
 
             for message in kafka_consumer:
-                kafka_consumer.poll(0.5)
+                kafka_consumer.poll(1)
                 key = message.key.decode('utf-8')
                 msg = json.loads(message.value.decode('utf-8'))
                 callback(app, key, msg)
@@ -63,10 +64,8 @@ class KafkaService:
             admin_client = KafkaAdminClient(**config)
 
             topic = NewTopic(name=topic_name, num_partitions=num_partitions, replication_factor=replication_factor)
-            if topic_name in admin_client.list_topics():
-                self.delete_topic(topic_name)
-
-            admin_client.create_topics([topic])
+            if topic_name not in admin_client.list_topics():
+                admin_client.create_topics([topic])
 
         except KafkaError as e:
             print(f'Error creating topic {topic_name}: {str(e)}')

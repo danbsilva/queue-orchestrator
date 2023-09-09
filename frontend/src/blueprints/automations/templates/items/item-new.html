@@ -1,5 +1,5 @@
-<form id="NewStepForm" role="application" novalidate="novalidate", data-automation="{{ automation.uuid }}">
+<form id="NewItemForm" role="application" novalidate="novalidate", data-automation="{{ automation.uuid }}" data-step="{{ step_uuid }}">
     {{ form.csrf_token() }}
     {{ form.uuid() }}
-    {% include 'steps/step-form.html' %}
+    {% include 'items/item-form.html' %}
 </form>

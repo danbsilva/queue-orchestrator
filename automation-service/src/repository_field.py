@@ -1,59 +1,53 @@
 from src.extensions.flask_sqlalchemy import db
 from src import models
+from sqlalchemy import text, or_
 
-__module_name__ = 'src.repository_automation_step'
+__module_name__ = 'src.repository_field.py'
 
 
-def create(automation, new_step):
-    step = models.Step(**new_step)
-    step.automation = automation
+def create(step, new_field):
+    field = models.Field(**new_field)
+    field.step = step
 
-    db.session.add(step)
+    db.session.add(field)
     db.session.commit()
 
-    return step
+    return field
 
 
-def get_all(automation):
-    return models.Step.query.filter_by(automation_id=automation.id).order_by(models.Step.step).all()
+def get_all(step,  search=''):
+    return models.Field.query.filter_by(step_id=step.id).filter(
+        or_(
+            models.Field.name.ilike('%{}%'.format(search)),
+            models.Field.alias.ilike('%{}%'.format(search)),
+            models.Field.description.ilike('%{}%'.format(search))
+        ),
+        ).order_by(models.Field.id).all()
 
 
 def get_by_id(id):
-    return models.Step.query.filter_by(id=id).first()
+    return models.Field.query.filter_by(id=id).first()
 
 def get_by_uuid(uuid):
-    return models.Step.query.filter_by(uuid=uuid).first()
-
-
-def get_by_topic(topic):
-    return models.Step.query.filter_by(topic=topic).first()
+    return models.Field.query.filter_by(uuid=uuid).first()
 
 
 def get_by_name(name):
     return models.Step.query.filter_by(name=name).first()
 
 
-def get_step_by_automation_id(automation_id, step):
-    return models.Step.query.filter_by(automation_id=automation_id, step=step).first()
+def get_field_by_step_id(step_id, field):
+    return models.Field.query.filter_by(step_id=step_id, field=field).first()
 
-
-def get_steps_by_automation_id(automation_id):
-    return models.Step.query.filter_by(automation_id=automation_id).order_by(models.Step.step).all()
-
-
-def get_step_by_uuid(uuid):
-    return models.Step.query.filter_by(uuid=uuid).first()
-
-
-def update(step, new_step):
-    for key, value in new_step.items():
-        setattr(step, key, value)
+def update(field, new_field):
+    for key, value in new_field.items():
+        setattr(field, key, value)
 
     db.session.commit()
 
-    return step
+    return field
 
 
-def delete(step):
-    db.session.delete(step)
+def delete(field):
+    db.session.delete(field)
     db.session.commit()

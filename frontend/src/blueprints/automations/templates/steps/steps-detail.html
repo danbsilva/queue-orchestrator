@@ -1,28 +1,104 @@
 <!-- Steps -->
 <div class="col-lg-12 mb-4 order-0">
-            <div id="automation-detalhe" class="card mb-4">
-                <div class="card-header pt-10 pb-0">
-                    <div class="row">
-                        <div class="col-lg-12">
+    <div id="automation-detalhe" class="card mb-4">
+        <div class="card-header pt-10 pb-0">
+            <div class="row">
+                <div class="col-lg-12">
+                    <nav aria-label="Page navigation">
+                        <div class="card-title d-flex align-items-start justify-content-between">
+                            <h5 class="flex-shrink-0">Etapas</h5>
                             <nav aria-label="Page navigation">
-                                <div class="card-title d-flex align-items-start justify-content-between">
-                                    <h5 class="flex-shrink-0">Etapas</h5>
-                                    <nav aria-label="Page navigation">
-                                        <ul class="pagination justify-content-end">
-                                           <a href="{{url_for('automations.edit_automation', uuid=automation.uuid)}}" type="button" class="btn p-0 text-success pull-up-full">
-                                                <i class="bx bx-xs bxs-plus-circle"></i>
-                                            </a>
-                                        </ul>
-                                    </nav>
-                                </div>
+                                <ul class="pagination justify-content-end">
+                                   <a href="{{url_for('automations.edit_automation', uuid=automation.uuid)}}" type="button" class="btn p-0 text-success pull-up-full">
+                                        <i class="bx bx-xs bxs-plus-circle"></i>
+                                    </a>
+                                </ul>
                             </nav>
                         </div>
-                    </div>
+                    </nav>
                 </div>
-
-                <div class="card-body">
-
-                </div>
-
             </div>
         </div>
+
+        <div class="card-body">
+            {% if steps %}
+            <div id="automations" class="row mb-4">
+                <div class="table-responsive">
+                    <table class="table align-middle table-nowrap table-hover" id="table-automations">
+                        <thead class="">
+                            <tr>
+                                <th hidden>UUID</th>
+                                <th>Nome</th>
+                                <th>Descrição</th>
+                                <th>step</th>
+                                <th>tópico</th>
+                                <th>nr. de tentativas</th>
+                                <th class="text-end">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for step in steps %}
+                            <tr>
+                                <td hidden>{{step.uuid}}</td>
+                                <td>{{step.name}}</td>
+                                <td>{{step.description}}</td>
+                                <td>{{step.step}}</td>
+                                <td>{{step.topic}}</td>
+                                <td>{{step.try_count}}</td>
+                                <td class="text-end">
+                                    <a href="{{url_for('automations.view_automation', uuid=step.uuid)}}" type="button" class="btn p-0 text-primary pull-up-full"><i class="bx bx-xs bx-show"></i></a>
+                                    <a href="{{url_for('automations.edit_automation', uuid=step.uuid)}}" type="button" class="btn p-0 text-info pull-up-full"><i class="bx bx-xs bx-edit"></i></a>
+                                    <a id="{{step.uuid}}" data-id="{{step.name}}" type="button" class="btn p-0 text-danger pull-up-full a-delete"><i class="bx bx-xs bx-trash"></i></a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 mb-4 order-0">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination pagination-rounded justify-content-center mt-2 mb-5">
+                            <li class="page-item prev {% if pagination.current_page == 1 %}disabled{% else %}pull-up-full{% endif %}">
+                              <a id="1" class="page-link a-page" href="javascript:void(0);">
+                                  <i class="tf-icon bx bx-chevrons-left"></i>
+                              </a>
+                            </li>
+                            {% for page_num in range(1, pagination.total_pages + 1) %}
+
+                                {% if page_num %}
+                                    {% if pagination.current_page == page_num %}
+                                    <li class="page-item active pull-up-full">
+                                      <a id="{{page_num}}" class="page-link a-page" href="javascript:void(0);">{{ page_num }}</a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item pull-up-full">
+                                      <a id="{{page_num}}" class="page-link a-page" href="javascript:void(0);">{{ page_num }}</a>
+                                    </li>
+                                    {% endif %}
+                                {% else %}
+                                    ...
+                                {% endif %}
+                            {% endfor %}
+                            <li class="page-item next {% if pagination.current_page == pagination.total_pages %}disabled{% else %}pull-up-full{% endif %}">
+                              <a id="{{ pagination.total_pages}}" class="page-link a-page" href="javascript:void(0);"
+                                ><i class="tf-icon bx bx-chevrons-right"></i
+                              ></a>
+                            </li>
+                        </ul>
+                    </nav>
+
+                </div>
+            </div>
+            {% else%}
+            <div class="row">
+                <div class="col-lg-12 mb-4 order-0">
+                    <div class="pagination pagination-rounded justify-content-center mt-2 mb-5">Sem resultados</div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>

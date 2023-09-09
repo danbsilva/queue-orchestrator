@@ -1,24 +1,35 @@
 
 <div class="card-header pt-10 pb-0">
     <div class="row mb-4">
-        <div class="col-lg-8">
+        <div class="col-lg-10">
             <nav aria-label="Page navigation">
                 <ul class="pagination">
                     <li class="breadcrumb-item">
                         <a href="javascript:void(0);">Home</a>
                     </li>
                     <li class="breadcrumb-item">
-                        <a href="{{url_for('automations.view_automation', uuid=step.automation.uuid)}}">{{ step.automation.name }}</a>
+                        <a href="{{url_for('automations.automations')}}">Automações</a>
                     </li>
-                    <li class="breadcrumb-item active">{{ step.name | upper }}</li>
+                    <li class="breadcrumb-item">
+                        <a href="{{url_for('automations.view_automation', uuid=item.step.automation.uuid)}}">{{ item.step.automation.name }}</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{{url_for('automations.view_step', uuid=item.step.uuid)}}">{{ item.step.name }}</a>
+                    </li>
+                    <li class="breadcrumb-item active">{{ item.uuid }}</li>
                 </ul>
             </nav>
         </div>
-        <div class="col-lg-4">
+        <div class="col-lg-2">
             <nav aria-label="Page navigation">
                 <ul class="pagination justify-content-end">
                     <li class="breadcrumb-item">
-                        <a href="javascript:void(0);" class="btn p-0 text-info pull-up-full addautomation">
+                        <a id="{{item.uuid}}"
+                           data-origin="detail"
+                           data-step="{{ item.step.uuid }}"
+                           data-automation="{{ item.step.automation.uuid }}"
+                           href="javascript:void(0);"
+                           class="btn p-0 text-info pull-up-full edititem">
                             <i class="bx bx-xs bxs-edit"></i>
                         </a>
                     </li>
@@ -30,27 +41,42 @@
 
 <div class="card-body">
     <div class="row">
-        <div class="col-lg-4 order-0 mb-4">
-            <label class="col-form-label">Nome</label>
-            <p class="form-control-static font-size-16">{{ step.name | upper }}</p>
+        <div class="col-lg-8 order-0">
+            <label class="col-form-label">UUID</label>
+            <p class="form-control-static font-size-16">{{ item.uuid }}</p>
         </div>
-        <div class="col-lg-2 order-0 mb-4">
-            <label class="col-form-label">Etapa</label>
-            <p class="form-control-static font-size-16">{{ step.step | upper }}</p>
+        <div class="col-lg-4 order-0">
+            <label class="col-form-label">Status</label>
+            <p class="form-control-static font-size-16">
+                {% if item.status == 'pending' %}
+                    <span class="badge bg-warning">Pendente</span>
+                {% elif item.status == 'running' %}
+                    <span class="badge bg-primary">Executando</span>
+                {% elif item.status == 'success' %}
+                    <span class="badge bg-success">Sucesso</span>
+                {% elif item.status == 'error' %}
+                    <span class="badge bg-danger">Erro</span>
+                {% endif %}
+            </p>
         </div>
-        <div class="col-lg-2 order-0 mb-4">
-            <label class="col-form-label">Tentativas</label>
-            <p class="form-control-static font-size-16">{{ step.try_count | upper }}</p>
-        </div>
-        <div class="col-lg-2 order-0 mb-4">
-            <label class="col-form-label">Tópico</label>
-            <p class="form-control-static font-size-16">{{ step.topic | upper }}</p>
-        </div>
+
     </div>
-    <div class="row">
-        <div class="col-lg-12 order-0">
-            <label class="col-form-label">Descrição</label>
-            <p class="form-control-static font-size-16">{{ step.description | upper }}</p>
+    {% for chunk in item.data.items()|batch(3) %}
+        <div class="row">
+            {% for data in chunk %}
+                <div class="col-lg-4 order-0">
+                    <label class="col-form-label">{{ data[0] }}</label>
+                    <p class="form-control-static font-size-16">
+                        {% if 'http' in data[1] %}
+                        <a href="{{ data[1] }}" target="_blank">
+                            <i class="tf-icon bx bx-xs bx-link-external text-primary"></i>
+                        </a>
+                        {% else %}
+                            {{ data[1] }}
+                        {% endif %}
+                    </p>
+                </div>
+            {% endfor %}
         </div>
-    </div>
+    {% endfor %}
 </div>

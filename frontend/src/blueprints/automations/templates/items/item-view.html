@@ -8,13 +8,14 @@
 
         <!-- Step -->
         <div class="col-lg-12 mb-4 order-0">
-            <div id="step-detalhe" class="card mb-4">
+            <div id="item-detalhe" class="card mb-4">
             </div>
         </div>
 
-        <!-- Steps -->
+        <!-- Hitoric -->
         <div class="col-lg-12 mb-4 order-0">
-            <div id="step-fields" class="card mb-4">
+            <div id="item-historic" class="card mb-4">
+                {% include 'historic/historic.html' %}
             </div>
         </div>
 
@@ -22,9 +23,7 @@
 
     <script>
         $(document).ready(function() {
-
-            loadDetailStep('{{ step.uuid }}');
-
+            loadDetailItem('{{item.uuid}}');
         });
     </script>
 

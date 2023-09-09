@@ -1,12 +1,14 @@
-from src import repository_service_log, repository_request_log
+from src.models.servicemodel import ServiceModel
+from src.models.requestmodel import RequestModel
+from src.services.datadogservice import DataDogService
 
 
-def save_service_log(app, key, msg):
+def save_service(app, key, msg):
     with app.app_context():
+        ServiceModel.save(msg)
+        DataDogService().submit_log(msg)
 
-        repository_service_log.create(msg)
 
-
-def save_request_log(app, key, msg):
+def save_request(app, key, msg):
     with app.app_context():
-        repository_request_log.create(msg)
+        RequestModel.save(msg)

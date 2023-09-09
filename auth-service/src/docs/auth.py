@@ -1,4 +1,4 @@
-from src import schemas
+from src.schemas import userschemas
 
 
 
@@ -28,15 +28,15 @@ docs_endpoints = [
         'methods': [
             {
             'POST': {
-                'request': return_model_dict(schemas.UserPostSchema()),
-                'response': {'user': return_model_dict(schemas.UserGetSchema())}
+                'request': return_model_dict(userschemas.UserPostSchema()),
+                'response': {'user': return_model_dict(userschemas.UserGetSchema())}
                 }
             },
             {
             'GET':
                 {
                     'response': {
-                        'users': [return_model_dict(schemas.UserGetSchema())],
+                        'users': [return_model_dict(userschemas.UserGetSchema())],
                         'pagination': {
                             'total_pages':'total_pages',
                             'current_page': 'current_page',
@@ -57,21 +57,21 @@ docs_endpoints = [
         'methods': [
             {
             'POST': {
-                'request': return_model_dict(schemas.UserPostSchema()),
-                'response': {'user': return_model_dict(schemas.UserGetSchema())}
+                'request': return_model_dict(userschemas.UserPostSchema()),
+                'response': {'user': return_model_dict(userschemas.UserGetSchema())}
                 }
             },
             {
             'GET':
                 {
-                    'response': {'user': return_model_dict(schemas.UserGetSchema())}
+                    'response': {'user': return_model_dict(userschemas.UserGetSchema())}
                 }
             },
             {
             'PATCH':
                 {
-                    'request': return_model_dict(schemas.UserPatchSchema()),
-                    'response': {'user': return_model_dict(schemas.UserGetSchema())}
+                    'request': return_model_dict(userschemas.UserPatchSchema()),
+                    'response': {'user': return_model_dict(userschemas.UserGetSchema())}
                 }
             },
             {
@@ -88,14 +88,14 @@ docs_endpoints = [
         'methods': [
             {
             'GET': {
-                'response': {'user': return_model_dict(schemas.UserGetSchema())}
+                'response': {'user': return_model_dict(userschemas.UserGetSchema())}
                 }
             },
             {
             'PATCH':
                 {
-                    'request': return_model_dict(schemas.UserPatchSchema()),
-                    'response': {'user': return_model_dict(schemas.UserGetSchema())}
+                    'request': return_model_dict(userschemas.UserPatchSchema()),
+                    'response': {'user': return_model_dict(userschemas.UserGetSchema())}
                 }
             },
         ]
@@ -105,7 +105,7 @@ docs_endpoints = [
         'methods': [
             {
                 'POST': {
-                    'response': {'user': return_model_dict(schemas.UserGetSchema())}
+                    'response': {'user': return_model_dict(userschemas.UserGetSchema())}
                 }
             }
         ]
@@ -115,7 +115,7 @@ docs_endpoints = [
         'methods': [
             {
             'POST': {
-                'request': return_model_dict(schemas.UserChangePasswordSchema()),
+                'request': return_model_dict(userschemas.UserChangePasswordSchema()),
                 'response': {'message': 'message'}
                 }
             }
@@ -126,7 +126,7 @@ docs_endpoints = [
         'methods': [
             {
                 'GET': {
-                    'response': {'user': return_model_dict(schemas.UserGetSchema())}
+                    'response': {'user': return_model_dict(userschemas.UserGetSchema())}
                 }
             }
         ]
@@ -136,7 +136,7 @@ docs_endpoints = [
         'methods': [
             {
                 'GET': {
-                    'response': {'user': return_model_dict(schemas.UserGetSchema())}
+                    'response': {'user': return_model_dict(userschemas.UserGetSchema())}
                 }
             }
         ]
@@ -146,7 +146,7 @@ docs_endpoints = [
         'methods': [
             {
                 'POST': {
-                    'request': return_model_dict(schemas.UserLoginSchema()),
+                    'request': return_model_dict(userschemas.UserLoginSchema()),
                     'response': {'token': 'token'}
                 }
             }
@@ -169,7 +169,7 @@ docs_endpoints = [
         'methods': [
             {
                 'POST': {
-                    'request': return_model_dict(schemas.UserSendEmailValidationSchema()),
+                    'request': return_model_dict(userschemas.UserSendEmailValidationSchema()),
                     'response': {'message': 'message'}
                 }
             }
@@ -192,7 +192,7 @@ docs_endpoints = [
         'methods': [
             {
                 'POST': {
-                    'request': return_model_dict(schemas.ForgotPasswordSchema()),
+                    'request': return_model_dict(userschemas.ForgotPasswordSchema()),
                     'response': {'message': 'message'}
                 }
             }
@@ -689,7 +689,7 @@ paths = {
 }
 
 definitions = {
-    'UserPostSchema': convert_to_swagger_dict(schemas.UserPostSchema()),
+    'UserPostSchema': convert_to_swagger_dict(userschemas.UserPostSchema()),
     'UsersGetSchema': {
         'type': 'object',
         'properties': {
@@ -701,9 +701,9 @@ definitions = {
             }
         }
     },
-    'UserGetSchema': convert_to_swagger_dict(schemas.UserGetSchema()),
-    'UserPatchSchema': convert_to_swagger_dict(schemas.UserPatchSchema()),
-    'UserLoginSchema': convert_to_swagger_dict(schemas.UserLoginSchema()),
+    'UserGetSchema': convert_to_swagger_dict(userschemas.UserGetSchema()),
+    'UserPatchSchema': convert_to_swagger_dict(userschemas.UserPatchSchema()),
+    'UserLoginSchema': convert_to_swagger_dict(userschemas.UserLoginSchema()),
     'UserLoginResponseSchema': {
         'type:': 'object',
         'properties': {
@@ -712,10 +712,10 @@ definitions = {
             },
         }
     },
-    'UserChangePasswordSchema': convert_to_swagger_dict(schemas.UserChangePasswordSchema()),
-    'UserForgotPasswordSchema': convert_to_swagger_dict(schemas.ForgotPasswordSchema()),
-    'UserResetPasswordSchema': convert_to_swagger_dict(schemas.UserSendEmailValidationSchema()),
-    'UserSendEmailValidationSchema': convert_to_swagger_dict(schemas.UserSendEmailValidationSchema()),
+    'UserChangePasswordSchema': convert_to_swagger_dict(userschemas.UserChangePasswordSchema()),
+    'UserForgotPasswordSchema': convert_to_swagger_dict(userschemas.ForgotPasswordSchema()),
+    'UserResetPasswordSchema': convert_to_swagger_dict(userschemas.UserSendEmailValidationSchema()),
+    'UserSendEmailValidationSchema': convert_to_swagger_dict(userschemas.UserSendEmailValidationSchema()),
     'MessageSchema': {
         'type': 'object',
         'properties': {

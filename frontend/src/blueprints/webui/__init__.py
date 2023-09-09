@@ -1,11 +1,10 @@
 from flask import Blueprint
 
-from src.blueprints.auth.controllers.auth_controller import *
+from src.blueprints.webui.controllers.index_controller import *
 
-bp = Blueprint("auth", __name__, template_folder="templates", static_folder="static", static_url_path='/static', url_prefix="/auth")
+bp = Blueprint("webui", __name__, template_folder="templates", static_folder="static", static_url_path='/webui/static', url_prefix="/webui")
 
-bp.add_url_rule("/login", view_func=login, endpoint='login', methods=['GET', 'POST'])
-bp.add_url_rule("/logout", view_func=logout, endpoint='logout', methods=['GET', 'POST'])
+bp.add_url_rule("/home", view_func=home, endpoint='home', methods=['GET'])
 
 
 def init_app(app):

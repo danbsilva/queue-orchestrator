@@ -1,29 +1,31 @@
 <!--Step Form -->
 <div class="row">
-    <div class="col-lg-8 order-0">
+    <div class="col-lg-6 order-0">
         <div id="div-{{form.name.id}}" class="form-group mb-2">
             {{ form.name.label(class="col-form-label",for=form.name.data) }}
-            {{ form.name(class="form-control input-error", placeholder="Nome") }}
+            {{ form.name(class="form-control input-error lowercase", placeholder="Nome") }}
         </div>
     </div>
-    <div class="col-lg-4 order-0">
-        <div id="div-{{form.step.id}}" class="form-group mb-2">
-            {{ form.step.label(class="col-form-label",for=form.step.data) }}
-            {{ form.step(class="form-control input-error", placeholder="Etapa") }}
+    <div class="col-lg-6 order-0">
+        <div id="div-{{form.alias.id}}" class="form-group mb-2">
+            {{ form.alias.label(class="col-form-label",for=form.alias.data) }}
+            {{ form.alias(class="form-control input-error", placeholder="Apelido") }}
         </div>
     </div>
 </div>
 <div class="row">
-    <div class="col-lg-8 order-0">
-        <div id="div-{{form.topic.id}}" class="form-group mb-2">
-            {{ form.topic.label(class="col-form-label",for=form.topic.data) }}
-            {{ form.topic(class="form-control input-error", placeholder="Tópico") }}
+    <div class="col-lg-6 order-0">
+        <div id="div-{{form.type.id}}" class="form-group mb-2">
+            {{ form.type.label(class="col-form-label",for=form.type.data) }}
+            {{ form.type(class="form-select select", placeholder="Tipo") }}
         </div>
     </div>
-    <div class="col-lg-4 order-0">
-        <div id="div-{{form.try_count.id}}" class="form-group mb-2">
-            {{ form.try_count.label(class="col-form-label",for=form.try_count.data) }}
-            {{ form.try_count(class="form-control input-error", placeholder="Tentativas") }}
+    <div class="col-lg-6 order-0">
+        <div id="div-{{form.required.id}}" class="form-group mb-2">
+            {{ form.required.label(class="form-check-label col-form-label",for=form.required.data) }}
+        </div>
+        <div id="div-{{form.required.id}}" class="form-group form-check form-switch mb-2">
+            {{ form.required(class="form-check-input input-error", placeholder="Obrigatório?") }}
         </div>
     </div>
 </div>
@@ -43,3 +45,33 @@
     </div>
 </div>
 
+<script>
+    $(document).ready(function() {
+        var select = $('.select').select2({
+            dropdownParent: $('#modalForm'),
+            theme: 'bootstrap-5',
+            dropdownCssClass: "select2--small",
+            scrollAfterSelect: true,
+            width: '100%',
+            placeholder: 'Selecione o tipo',
+            allowClear: true,
+            language: {
+                inputTooShort: function () {
+                    return 'Digite pelo menos 3 caracteres';
+                },
+                noResults: function () {
+                    return 'Nenhum resultado encontrado';
+                },
+                searching: function () {
+                    return 'Buscando...';
+                },
+                loadingMore: function () {
+                    return 'Carregando mais resultados...';
+                },
+                maximumSelected: function () {
+                    return 'Você só pode selecionar um proprietário';
+                }
+            },
+        });
+    });
+</script>

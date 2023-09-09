@@ -1,5 +1,4 @@
-<form id="NewAutomationForm" role="application" novalidate="novalidate">
-    {{ form.csrf_token() }}
-    {{ form.uuid() }}
-    {% include 'automations/automation-form.html' %}
+<form id="NewOwnerForm" role="application" novalidate="novalidate" data-automation="{{ automation.uuid }}">
+    {{ form.csrf_token }}
+    {% include 'automations/owner-form.html' %}
 </form>

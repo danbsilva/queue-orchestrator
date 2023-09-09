@@ -49,7 +49,6 @@ docker-compose up -d
 - **zoopkeeper**: responsible for managing the KAFKA cluster
 - **kafka**: responsible for managing the KAFKA cluster
 - **control-center**: responsible for managing the KAFKA cluster
-- **topic-creator**: responsible for creating the topics of the KAFKA cluster
 - **redis**: responsible for managing the Redis cluster
 - **dbservices**: responsible for managing the database of api-gateway
 - **gateway**: responsible for managing the api-gateway

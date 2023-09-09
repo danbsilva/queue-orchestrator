@@ -1,14 +1,14 @@
-from src import repository
+from src.models.usermodel import UserModel
 from threading import Thread
 
-from src import kafka
+from src.services.kafkaservice import KafkaService
 from uuid import uuid4
-from src import schemas
+from src.schemas import userschemas
 
 
 def create_admin(app):
     with app.app_context():
-        user = repository.get_by_email(email='admin@admin.com')
+        user = UserModel.get_by_email(email='admin@admin.com')
         if not user:
             new_user = {
                 'username':'admin',
@@ -20,5 +20,5 @@ def create_admin(app):
                 'is_admin':True
             }
 
-            repository.create(new_user)
+            UserModel.save(new_user)
 

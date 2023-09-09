@@ -1,50 +1,55 @@
 from flask import render_template, request, redirect, url_for, session, flash
-from werkzeug.security import check_password_hash, generate_password_hash
-
-from src.helpers.token_provider import create_token_jwt
 from src.blueprints.auth.forms.auth_forms import LoginForm
 
-from src.models import Usuario
-
-
-def on_login(user):
-
-    session['id'] = user.id
-    session['nome'] = user.nome
-    session['email'] = user.email
-    session['token'] = create_token_jwt(user.id)
+from src.repositories import auth_repository, users_repository
+from src.blueprints.auth.security import login_required
+from src.helpers import convert_error_to_tuple
 
 
 def login():
+    errors = []
     form = LoginForm(request.form)
-    if form.validate_on_submit():
-        args = form.data
-        args.pop('salvar', None)
-        args.pop('csrf_token', None)
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            args = form.data
+            args.pop('salvar', None)
+            args.pop('csrf_token', None)
 
-        user = Usuario.query.filter_by(email=form.data['email']).first()
-        if not user:
-            form.email.errors.append('E-mail não cadastrado')
-            return render_template('auth/login.html', form=form)
+            response, code = auth_repository.login(args['email'], args['password'])
+            if code == 200:
+                session['token'] = response['token']
+                session['uuid'] = response['user']['uuid']
+                session['username'] = response['user']['username']
+                session['name'] = response['user']['name']
+                session['email'] = response['user']['email']
+                session['is_admin'] = response['user']['is_admin']
 
-        if check_password_hash(user.password, form.data['password']):
-            on_login(user=user)
-            return redirect(url_for('webui.index'))
+                return 'webui.home', code
+
+            errors = convert_error_to_tuple(response)
+            return errors, code
+
         else:
-            form.password.errors.append('Senha inválida')
+            errors = errors + list(form.errors.items())
+            return errors, 400
 
     return render_template('auth/login.html', form=form)
 
 
+@login_required.verify_login
 def logout():
-    form = LoginForm()
+    response, code = auth_repository.logout()
+    if code == 200:
+        session.pop('token', None)
+        session.pop('uuid', None)
+        session.pop('username', None)
+        session.pop('name', None)
+        session.pop('email', None)
+        session.pop('is_admin', None)
 
-    session['id'] = None
-    session['nome'] = None
-    session['email'] = None
-    session['token'] = None
+        return 'auth.login', code
 
-    flash('Você fez logout do sistema')
+    errors = convert_error_to_tuple(response)
+    return errors, code
 
-    return render_template('auth/login.html', form=form)
 

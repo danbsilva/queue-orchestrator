@@ -15,10 +15,6 @@ CONTAINER_NAME = config_env('CONTAINER_NAME')
 ALGORITHM = config_env('ALGORITHM')
 SECRET_KEY = config_env('SECRET_KEY')
 
-# DB
-SQLALCHEMY_DATABASE_URI = config_env('SQLALCHEMY_DATABASE_URI')
-BUNDLE_ERRORS = config_env('BUNDLE_ERRORS')
-
 # REDIS
 CACHE_TYPE = config_env('CACHE_TYPE')
 CACHE_REDIS_HOST = config_env('CACHE_REDIS_HOST')
@@ -32,9 +28,12 @@ KAFKA_SERVER = config_env('KAFKA_SERVER')
 
 # EXTENSIONS
 EXTENSIONS = [
-    'src.routes:init_app',
-    'src.extensions.flask_sqlalchemy:init_app',
-    'src.extensions.flask_marshmallow:init_app',
+    'src.blueprints.auth:init_app',
+    'src.blueprints.users:init_app',
+    'src.blueprints.automations:init_app',
+    'src.blueprints.webui:init_app',
     'src.extensions.flask_cache:init_app',
+    'src.extensions.flask_jsglue:init_app',
+    'src.extensions.flask_csrf:init_app',
 
 ]

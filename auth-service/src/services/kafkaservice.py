@@ -1,20 +1,25 @@
 import json
-from decouple import config as config_env
-from src import logging
+import os
 
 from kafka import KafkaProducer
 from kafka.errors import KafkaError
 
-__module_name__ = 'src.kafka'
+class KafkaService:
 
-def kafka_producer(topic, key, value):
+    default_config = {
+         'bootstrap_servers': os.getenv('KAFKA_SERVER'),
+    }
 
-    try:
-        producer = KafkaProducer(bootstrap_servers=config_env('KAFKA_SERVER'),
-                                 value_serializer=lambda v: json.dumps(v).encode('utf-8'))
-        producer.send(topic, key=key.encode('utf-8'), value=value)
-        producer.flush()
-        producer.close()
-    except KafkaError as e:
-        logging.send_log_kafka('INFO', __module_name__, 'kafka_producer',
-                               f'Error on send message to kafka: {e}')
+    config_producer = {
+        'value_serializer': lambda v: json.dumps(v).encode('utf-8')
+    }
+
+    def producer(self, topic, key, value):
+        try:
+            config = {**self.default_config, **self.config_producer}
+            kafka_producer = KafkaProducer(**config)
+            kafka_producer.send(topic, key=key.encode('utf-8'), value=value)
+            kafka_producer.flush()
+            kafka_producer.close()
+        except KafkaError as e:
+            print(f'Error on send message to kafka: {e}')

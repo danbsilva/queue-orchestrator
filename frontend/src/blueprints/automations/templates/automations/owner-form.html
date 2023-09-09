@@ -1,25 +1,14 @@
-<!--Automation Form -->
-<div class="row">
-    <div class="col-lg-6 order-0">
-        <div id="div-{{form.name.id}}" class="form-group mb-2">
-            {{ form.name.label(class="col-form-label",for=form.name.data) }}
-            {{ form.name(class="form-control input-error", placeholder="Nome") }}
-
-        </div>
-    </div>
-    <div class="col-lg-6 order-0">
-        <div id="div-{{form.acronym.id}}" class="form-group mb-2">
-            {{ form.acronym.label(class="col-form-label",for=form.acronym.data) }}
-            {{ form.acronym(class="form-control input-error", placeholder="Sigla") }}
-        </div>
-    </div>
-</div>
+<!-- Owners Form -->
 <div class="row">
     <div class="col-lg-12 order-0">
-        <div id="div-{{form.description.id}}" class="form-group mb-2">
-            {{ form.description.label(class="col-form-label",for=form.description.data) }}
-            {{ form.description(class="form-control input-error", placeholder="Descrição") }}
-
+        <div id="div-{{form.owner.id}}" class="form-group mb-2">
+            {{ form.owner.label(class="col-form-label",for=form.owner.id) }}
+            <select id="{{ form.owner.id }}" class="form-select select input-error" name="{{ form.owner.id }}">
+                <option value="" disabled selected>Selecione um proprietário</option>
+                {% for user in users %}
+                    <option value="{{ user.uuid }}">{{ user.name }}</option>
+                {% endfor %}
+            </select>
         </div>
     </div>
 </div>
@@ -30,3 +19,34 @@
     </div>
 </div>
 
+<script>
+    $(document).ready(function() {
+         var select = $('.select').select2({
+            dropdownParent: $('#modalForm'),
+            theme: 'bootstrap-5',
+            dropdownCssClass: "select2--small",
+            scrollAfterSelect: true,
+            width: '100%',
+            placeholder: 'Selecione um proprietário',
+            allowClear: true,
+            minimumInputLength: 3,
+            language: {
+                inputTooShort: function () {
+                    return 'Digite pelo menos 3 caracteres';
+                },
+                noResults: function () {
+                    return 'Nenhum resultado encontrado';
+                },
+                searching: function () {
+                    return 'Buscando...';
+                },
+                loadingMore: function () {
+                    return 'Carregando mais resultados...';
+                },
+                maximumSelected: function () {
+                    return 'Você só pode selecionar um proprietário';
+                }
+            },
+        });
+    });
+</script>
