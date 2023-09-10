@@ -1,8 +1,5 @@
-from flask import session, render_template, redirect, url_for, flash
+from flask import session, redirect, url_for
 from functools import wraps
-
-from src.blueprints.auth.forms.auth_forms import LoginForm
-from src.repositories import auth_repository
 
 
 def verify_login(f):

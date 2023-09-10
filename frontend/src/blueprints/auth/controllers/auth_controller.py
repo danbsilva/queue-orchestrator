@@ -1,7 +1,7 @@
-from flask import render_template, request, redirect, url_for, session, flash
+from flask import render_template, request, session
 from src.blueprints.auth.forms.auth_forms import LoginForm
 
-from src.repositories import auth_repository, users_repository
+from src.repositories import auth_repository
 from src.blueprints.auth.security import login_required
 from src.helpers import convert_error_to_tuple
 

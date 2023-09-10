@@ -120,7 +120,7 @@ paths = {
     },
     '/services/{service_uuid}/routes/': {
         'post': {
-            'tags': ['routes'],
+            'tags': ['services'],
             'description': 'Create a new route',
             'parameters': [
                 {
@@ -144,7 +144,7 @@ paths = {
             }
         },
         'get': {
-            'tags': ['routes'],
+            'tags': ['services'],
             'description': 'Get all routes',
             'parameters': [
                 {
@@ -164,7 +164,7 @@ paths = {
     },
     '/services/routes/{route_uuid}/': {
         'get': {
-            'tags': ['routes'],
+            'tags': ['services'],
             'description': 'Get a route',
             'parameters': [
                 {
@@ -182,7 +182,7 @@ paths = {
             }
         },
         'patch': {
-            'tags': ['routes'],
+            'tags': ['services'],
             'description': 'Update a route',
             'parameters': [
                 {

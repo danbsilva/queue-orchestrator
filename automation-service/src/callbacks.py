@@ -1,14 +1,18 @@
-from src import kafka, schemas, logging
-from src import messages
-from src import repository_item, repository_step, repository_item_historic
+
 from threading import Thread
+from src import messages
+from src.schemas import itemschemas
+from src.models.itemmodel import ItemModel, ItemHistoricModel
+from src.models.stepmodel import StepModel
+from src.services.kafkaservice import KafkaService
+from src.logging import Logger
 
 
 __module_name__ = 'src.callbacks'
 
 
 def send_to_kafka(current_step, item, message):
-    Thread(target=kafka.kafka_producer, args=(current_step.topic, item.uuid, message,)).start()
+    Thread(target=KafkaService().producer, args=(current_step.topic, item.uuid, message,)).start()
 
 
 def verify_if_next_step_exists(msg, item):
@@ -20,7 +24,7 @@ def verify_if_next_step_exists(msg, item):
             msg['try_count'] = msg['try_count'] - 1
 
             description = f'{str(msg["status"])}'
-            logging.send_log_kafka('EXCEPTION', __module_name__, 'verify_if_next_step_exists',
+            Logger().dispatch('ERROR', __module_name__, 'verify_if_next_step_exists',
                                    f'Item {msg["uuid"]} marked as Error', msg["transaction_id"])
 
         else:
@@ -28,7 +32,7 @@ def verify_if_next_step_exists(msg, item):
 
             item.status = 'pending'
             description = messages.ITEM_SENT_TO_QUEUE.format(current_step.topic)
-            logging.send_log_kafka('INFO', __module_name__, 'verify_if_next_step_exists',
+            Logger().dispatch('INFO', __module_name__, 'verify_if_next_step_exists',
                                    f'Item {msg["uuid"]} sent to Queue {current_step.topic}', msg["transaction_id"])
 
         send_to_kafka(current_step, item, message)
@@ -36,7 +40,7 @@ def verify_if_next_step_exists(msg, item):
     else:
         item.status = 'finished'
         description = messages.ITEM_FINISHED
-        logging.send_log_kafka('INFO', __module_name__, 'verify_if_next_step_exists',
+        Logger().dispatch('INFO', __module_name__, 'verify_if_next_step_exists',
                                f'Item {msg["uuid"]} finished.', msg["transaction_id"])
 
     return description
@@ -45,8 +49,8 @@ def verify_if_next_step_exists(msg, item):
 def next_step_exists(msg, item):
     max_step = msg['steps']['max_steps']
 
-    current_step = repository_step.get_by_uuid(uuid=msg['steps']['next_step']['uuid'])
-    next_step = repository_step.get_step_by_automation_id(
+    current_step = StepModel.get_by_uuid(uuid=msg['steps']['next_step']['uuid'])
+    next_step = StepModel.get_step_by_automation_id(
         automation_id=msg['steps']['next_step']['automation_id'],
         step=msg['steps']['next_step']['step'] + 1) \
         if msg['steps']['next_step']['step'] < max_step else None
@@ -55,7 +59,7 @@ def next_step_exists(msg, item):
 
     item.step = current_step
 
-    schema_item = schemas.ItemGetSchema()
+    schema_item = itemschemas.ItemGetSchema()
     schema_data = schema_item.dump(item)
 
     json_steps = {
@@ -83,14 +87,14 @@ def next_step_exists(msg, item):
 
 
 def next_step_not_exists(msg):
-    current_step = repository_step.get_by_uuid(uuid=msg['steps']['current_step']['uuid'])
+    current_step = StepModel.get_by_uuid(uuid=msg['steps']['current_step']['uuid'])
     message = msg
     return current_step, message
 
 
 def items_processed(app, key, msg):
     with app.app_context():
-        item = repository_item.get_by_uuid(uuid=msg['uuid'])
+        item = ItemModel.get_by_uuid(uuid=msg['uuid'])
         if item:
             if msg['try_count'] > 1:
 
@@ -100,13 +104,13 @@ def items_processed(app, key, msg):
                 if 'Exception' in msg['status']:
                     item.status = 'failed'
                     description = f'{str(msg["status"])}'
-                    logging.send_log_kafka('EXCEPTION', __module_name__, 'items_processed',
+                    Logger().dispatch('EXCEPTION', __module_name__, 'items_processed',
                                            f'It was not possible to process the item {msg["uuid"]}',
                                            msg["transaction_id"])
 
                 else:
                     description = verify_if_next_step_exists(msg, item)
-                    logging.send_log_kafka('INFO', __module_name__, 'items_processed',
+                    Logger().dispatch('INFO', __module_name__, 'items_processed',
                                            f'Item {msg["uuid"]} processed successfully', msg["transaction_id"])
 
             new_item = {
@@ -115,29 +119,29 @@ def items_processed(app, key, msg):
             }
 
             try:
-                repository_item_historic.create(item=item, description=f'{description}')
+                ItemHistoricModel.create(item=item, description=f'{description}')
             except Exception as e:
-                logging.send_log_kafka('CRITICAL', __module_name__, 'items_processed', e.args[0],
+                Logger().dispatch('CRITICAL', __module_name__, 'items_processed', e.args[0],
                                        msg["transaction_id"])
             try:
-                repository_item.update(item, new_item)
-                logging.send_log_kafka('INFO', __module_name__, 'items_processed',
+                ItemModel.update(item, new_item)
+                Logger().dispatch('INFO', __module_name__, 'items_processed',
                                        f'Item {msg["uuid"]} updated successfully', msg["transaction_id"])
             except Exception as e:
-                logging.send_log_kafka('CRITICAL', __module_name__, 'items_processed', e.args[0],
+                Logger().dispatch('CRITICAL', __module_name__, 'items_processed', e.args[0],
                                        msg["transaction_id"])
 
 
 def items_in_process(app, key, msg):
     with app.app_context():
-        item = repository_item.get_by_uuid(uuid=msg['uuid'])
+        item = ItemModel.get_by_uuid(uuid=msg['uuid'])
         if item:
             item.status = 'running'
             try:
-                repository_item.update_status(item)
-                logging.send_log_kafka('INFO', __module_name__, 'items_in_progress',
+                ItemModel.update_status(item)
+                Logger().dispatch('INFO', __module_name__, 'items_in_progress',
                                        f'Item {msg["uuid"]} is running', msg["transaction_id"])
             except Exception as e:
-                logging.send_log_kafka('CRITICAL', __module_name__, 'items_in_progress', e.args[0],
+                Logger().dispatch('CRITICAL', __module_name__, 'items_in_progress', e.args[0],
                                        msg["transaction_id"])
 

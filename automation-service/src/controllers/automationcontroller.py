@@ -1,7 +1,4 @@
-from decouple import config as config_env
-from threading import Thread
-
-from marshmallow import fields
+import os
 from marshmallow import ValidationError
 
 from flask import request
@@ -9,16 +6,10 @@ from flask_restful import Resource
 from flask_paginate import Pagination
 from werkzeug.exceptions import UnsupportedMediaType
 
-from src.extensions.flask_cache import cache
 from src.providers import cors_provider
-from src.docs import automations
-
-from src import schemas, logging
 from src.logging import Logger
-
 from src.schemas import automationschemas
 from src.models.automationmodel import AutomationModel
-
 from src import messages
 
 import requests
@@ -30,7 +21,7 @@ __module_name__ = 'src.controllers.automationcontroller'
 # Function to get page args
 def get_page_args():
     page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', int(config_env('PER_PAGE')), type=int)
+    per_page = request.args.get('per_page', int(os.getenv('PER_PAGE')), type=int)
     offset = (page - 1) * per_page
     return page, per_page, offset
 
@@ -41,71 +32,7 @@ def validate_schema(schema, data):
         schema.load(data)
     except ValidationError as e:
         return e.messages
-
-
-# Return Dynamic Schema for validation fields from database to each step
-def return_dynamic_schema(fields_from_db):
-    schema = automationschemas.DynamicSchema()
-    for field in fields_from_db:
-        field_name = field.name
-        field_alias = field.alias
-        field_type = getattr(fields, field.type.capitalize())
-
-        field_args = {}
-        if field.required:
-            field_args["required"] = True
-
-        # Add validation if exists
-        dynamic_field = field_type(**field_args)
-
-        if field.required:
-            dynamic_field.required = True
-            dynamic_field.allow_none = False
-            dynamic_field.allow_empty = False
-
-            required_message = f'{messages.FIELD_ITEM_REQUIRED.format(field_alias.upper())}'
-            if field.type == 'url':
-                invalid_message = f'{messages.FIELD_ITEM_INVALID_URL.format(field_alias.upper())}'
-            else:
-                invalid_message = f'{messages.FIELD_ITEM_INVALID.format(field_alias.upper())}'
-
-            dynamic_field.error_messages = {
-                'required': required_message,
-                'null': required_message,
-                'empty': required_message,
-                'invalid': invalid_message,
-                'invalid_url': invalid_message,
-                'validator_failed': invalid_message,
-            }
-
-        schema.fields[field_name] = dynamic_field
-        schema.declared_fields[field_name] = dynamic_field
-        schema.load_fields[field_name] = dynamic_field
-        schema.dump_fields[field_name] = dynamic_field
-
-    return schema
-
-
-# Function to format topic name
-def format_topic_name(name):
-    # Replace spaces with underscores
-    name = name.replace(' ', '_')  # Replace spaces with underscores
-    name = ''.join(
-        e if e.isalnum() or e == '_' else '_' for e in name)  # Replace special characters with underscores
-    name = name.upper()  # Convert to uppercase
-    return name
-
-
-# Function to format field name
-def format_field_name(name):
-    # Replace spaces with underscores
-    name = name.replace(' ', '_')  # Replace spaces with underscores
-    name = ''.join(
-        e if e.isalnum() or e == '_' else '_' for e in name)  # Replace special characters with underscores
-
-    name = name.lower()  # Convert to lowercase
-    return name
-
+    
 
 # Function to verify token
 def verify_token():
@@ -167,18 +94,18 @@ class AutomationsResource(Resource):
                                        f'Schema validation error: {schema_validate}')
                 return {'message': schema_validate}, 400
 
-            if AutomationModel.get_by_name(data['name']):
+            if AutomationModel.get_by_name(name=data['name']):
                 Logger().dispatch('INFO', __module_name__, 'AutomationsResource.post',
                                        f'Automation name {data["name"]} already exists')
                 return {'message': messages.AUTOMATION_NAME_ALREADY_EXISTS}, 400
 
-            if AutomationModel.get_by_acronym(data['acronym']):
+            if AutomationModel.get_by_acronym(acronym=data['acronym']):
                 Logger().dispatch('INFO', __module_name__, 'AutomationsResource.post',
                                        f'Automation acronym {data["acronym"]} already exists')
                 return {'message': messages.AUTOMATION_ACRONYM_ALREADY_EXISTS}, 400
 
             try:
-                automation = AutomationModel.create(data)
+                automation = AutomationModel.create(new_automation=data)
                 Logger().dispatch('INFO', __module_name__, 'AutomationsResource.post',
                                        f'Automation {automation.uuid} created successfully')
             except Exception as e:
@@ -279,20 +206,20 @@ class AutomationResource(Resource):
 
             if data.get('name'):
                 if automation.name != data['name']:
-                    if AutomationModel.get_by_name(data['name']):
+                    if AutomationModel.get_by_name(name=data['name']):
                         Logger().dispatch('INFO', __module_name__, 'AutomationResource.patch',
                                                f'Automation name {data["name"]} already exists')
                         return {'message': messages.AUTOMATION_NAME_ALREADY_EXISTS}, 400
 
             if data.get('acronym'):
                 if automation.acronym != data['acronym']:
-                    if AutomationModel.get_by_acronym(data['acronym']):
+                    if AutomationModel.get_by_acronym(acronym=data['acronym']):
                         Logger().dispatch('INFO', __module_name__, 'AutomationResource.patch',
                                                f'Automation acronym {data["acronym"]} already exists')
                         return {'message': messages.AUTOMATION_ACRONYM_ALREADY_EXISTS}, 400
 
             try:
-                automation = AutomationModel.update(automation, data)
+                automation = AutomationModel.update(automation=automation, new_automation=data)
                 Logger().dispatch('INFO', __module_name__, 'AutomationResource.patch',
                                         f'Automation {automation.uuid} updated successfully')
             except Exception as e:

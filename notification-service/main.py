@@ -3,8 +3,6 @@ from dotenv import load_dotenv
 
 # Load project variables
 load_dotenv('.env')
-
-# Load shared variables
 load_dotenv('shared.env')
 
 

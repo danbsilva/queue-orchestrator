@@ -1,11 +1,10 @@
 import os
-from time import sleep
 from dotenv import load_dotenv
 
 
 # Load shared  and project variables
-load_dotenv('shared.env')
 load_dotenv('.env')
+load_dotenv('shared.env')
 
 
 from src import app, register, threads
@@ -24,4 +23,4 @@ if __name__ == '__main__':
     host = os.getenv("APP_HOST")
     port = os.getenv("APP_PORT")
     debug = os.getenv("DEBUG")
-    #app.run(host=host, port=port, debug=debug, use_reloader=debug)
+    #main_app.run(host=host, port=port, debug=debug, use_reloader=debug)

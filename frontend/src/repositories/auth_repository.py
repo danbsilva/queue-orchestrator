@@ -1,5 +1,5 @@
+import os
 import requests
-from decouple import config as config_env
 from flask import session, request
 
 service_url = 'auth/'
@@ -19,7 +19,7 @@ def login(email, password):
         }
     response = requests.request(
         method='POST',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}login/',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}login/',
         json=payload,
         headers=get_headers()
     )
@@ -32,7 +32,7 @@ def login(email, password):
 def logout():
     response = requests.request(
         method='GET',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}logout/',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}logout/',
         headers=get_headers()
     )
     try:
@@ -44,7 +44,7 @@ def logout():
 def verify_token():
     response = requests.request(
         method='GET',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}validate/token/',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}validate/token/',
         headers=get_headers()
     )
     try:

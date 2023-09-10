@@ -22,7 +22,7 @@ def filter_endpoint(endpoint_path, method, schema):
 
 def service(app):
     with app.app_context():
-        service_name = app.name
+        service_name = os.getenv("APP_NAME")
         service_host = f'http://{os.getenv("CONTAINER_NAME")}:{os.getenv("APP_PORT")}'
         routes = register_routes(app)
 
@@ -32,7 +32,7 @@ def service(app):
             'routes': routes
         }
 
-        Thread(target=KafkaService().producer, args=(os.getenv('TOPIC_SERVICES_REGISTER'), app.name, data, )).start()
+        Thread(target=KafkaService().producer, args=(os.getenv('TOPIC_SERVICES_REGISTER'), os.getenv("APP_NAME"), data, )).start()
 
 
 def register_routes(app):

@@ -2,7 +2,7 @@ import re
 from marshmallow import Schema, fields, validate, ValidationError
 from marshmallow.fields import Nested
 from src import messages
-
+from src.schemas.automationschemas import AutomationGetSchema
 
 def validate_alphanumeric(value):
     if not re.match(r'^[a-zA-Z0-9 _]+$', value):
@@ -54,6 +54,7 @@ class StepGetSchema(Schema):
     step = fields.Integer(required=True)
     topic = fields.String(required=True)
     try_count = fields.Integer(required=True)
+    automation = Nested(AutomationGetSchema, required=True)
 
     class Meta:
         ordered = True

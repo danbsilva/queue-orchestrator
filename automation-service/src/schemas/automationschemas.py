@@ -9,12 +9,6 @@ def validate_alphanumeric(value):
         raise ValidationError(messages.ALPHANUMERIC_ERROR)
 
 
-#### DYNAMIC SCHEMA ####
-class DynamicSchema(Schema):
-    class Meta:
-        ordered = True
-
-
 #### AUTOMATIONS ####
 class AutomationPostSchema(Schema):
     name = fields.String(

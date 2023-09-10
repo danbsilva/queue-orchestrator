@@ -21,6 +21,7 @@ MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
 MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER')
 
 
+# EXTENSIONS
 EXTENSIONS = [
     'src.extensions.mail:init_app'
 ]

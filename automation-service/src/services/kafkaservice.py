@@ -1,5 +1,5 @@
+import os
 import json
-from decouple import config as config_env
 from time import sleep
 
 from kafka import KafkaProducer, KafkaConsumer
@@ -10,7 +10,7 @@ from kafka.errors import KafkaError
 class KafkaService:
 
     default_config = {
-        'bootstrap_servers': config_env('KAFKA_SERVER'),
+        'bootstrap_servers': os.getenv('KAFKA_SERVER'),
     }
 
     config_producer = {
@@ -18,13 +18,13 @@ class KafkaService:
     }
 
     config_consumer = {
-        'group_id': 'logs_service_group',
-        'auto_offset_reset': 'earliest'
+        'group_id': os.getenv('APP_NAME'),
     }
 
     def is_broker_available(self):
         try:
-            KafkaConsumer(bootstrap_servers=config_env('KAFKA_SERVER'))
+            config = {**self.default_config}
+            KafkaConsumer(**config)
             return True
         except KafkaError:
             return False
@@ -59,13 +59,14 @@ class KafkaService:
         except KafkaError as e:
             print(f'Error consuming message: {str(e)}')
 
-    def create_topic(self, topic_name, num_partitions=2, replication_factor=2, transaction_id=None):
+    def create_topic(self, topic_name, num_partitions=3, replication_factor=3, transaction_id=None):
         try:
             config = {**self.default_config}
             admin_client = KafkaAdminClient(**config)
 
             topic = NewTopic(name=topic_name, num_partitions=num_partitions, replication_factor=replication_factor)
             if topic_name not in admin_client.list_topics():
+                
                 # Create topic
                 admin_client.create_topics([topic])
 
@@ -78,7 +79,7 @@ class KafkaService:
             admin_client = KafkaAdminClient(**config)
 
             # Cria um novo tópico com o novo nome
-            create_topic(new_topic, 1, 1, transaction_id)
+            self.create_topic(new_topic, 1, 1, transaction_id)
 
             # Verifica se o tópico antigo existe
             if old_topic in admin_client.list_topics():
@@ -92,13 +93,13 @@ class KafkaService:
                 messages = consumer.poll(0.5)
                 while messages:
                     for message in messages[old_topic]:
-                        kafka_producer(new_topic, message.key, message.value)
+                        self.producer(new_topic, message.key, message.value)
                     messages = consumer.poll(0.5)
 
                 consumer.close()
 
                 # Exclui o tópico antigo
-                delete_topic(old_topic, transaction_id)
+                self.delete_topic(old_topic, transaction_id)
 
         except KafkaError as e:
             print(f'Error renaming topic {old_topic} to {new_topic}: {str(e)}')

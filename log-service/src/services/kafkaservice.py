@@ -17,7 +17,7 @@ class KafkaService:
     }
 
     config_consumer = {
-        'group_id': 'logs_service_group',
+        'group_id': os.getenv('APP_NAME'),
         'auto_offset_reset': 'earliest'
     }
 

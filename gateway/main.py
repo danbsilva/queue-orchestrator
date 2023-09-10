@@ -2,10 +2,7 @@ import os
 from dotenv import load_dotenv
 from threading import Thread
 
-# Load project variables
 load_dotenv('.env')
-
-# Load shared variables
 load_dotenv('shared.env')
 
 

@@ -6,16 +6,16 @@ BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 DEBUG = os.getenv("DEBUG")
 FLASK_ENV = os.getenv("FLASK_ENV")
 FLASK_APP = os.getenv("FLASK_APP")
-APP_NAME = os.getenv('APP_NAME')
-APP_PORT = int(os.getenv('APP_PORT'))
-APP_HOST = os.getenv('APP_HOST')
-CONTAINER_NAME = os.getenv('CONTAINER_NAME')
+APP_NAME = os.getenv("APP_NAME")
+APP_PORT = int(os.getenv("APP_PORT"))
+APP_HOST = os.getenv("APP_HOST")
+CONTAINER_NAME = os.getenv("CONTAINER_NAME")
 
 
 # DB
-BUNDLE_ERRORS = os.getenv('BUNDLE_ERRORS')
-SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI')
-SQLALCHEMY_TRACK_MODIFICATIONS = os.getenv('SQLALCHEMY_TRACK_MODIFICATIONS')
+BUNDLE_ERRORS = os.getenv("BUNDLE_ERRORS")
+SQLALCHEMY_TRACK_MODIFICATIONS = os.getenv("SQLALCHEMY_TRACK_MODIFICATIONS")
+SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI")
 
 
 # REDIS
@@ -29,9 +29,9 @@ CACHE_DEFAULT_TIMEOUT = os.getenv("CACHE_DEFAULT_TIMEOUT")
 
 # EXTENSIONS
 EXTENSIONS = [
-    'src.routes:init_app',
-    'src.extensions.flask_sqlalchemy:init_app',
-    'src.extensions.flask_marshmallow:init_app',
-    'src.extensions.flask_cache:init_app',
+    "src.routes:init_app",
+    "src.extensions.flask_sqlalchemy:init_app",
+    "src.extensions.flask_marshmallow:init_app",
+    "src.extensions.flask_cache:init_app",
 
 ]

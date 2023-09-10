@@ -1,8 +1,5 @@
-from flask import session, render_template, redirect, url_for, flash, abort
+from flask import render_template
 from functools import wraps
-
-from src.blueprints.auth.forms.auth_forms import LoginForm
-from src.repositories import auth_repository
 
 
 def abort(error_code):

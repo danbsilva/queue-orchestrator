@@ -1,5 +1,5 @@
 import json
-from flask import render_template, request, redirect, url_for, session, flash
+from flask import render_template, request, session
 from src.blueprints.automations.forms.automations_forms import AutomationForm
 from src.blueprints.automations.forms.steps_forms import StepForm
 from src.blueprints.automations.forms.items_forms import ItemForm, create_dynamic_fields

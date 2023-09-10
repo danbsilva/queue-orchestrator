@@ -21,7 +21,7 @@ def filter_endpoint(endpoint_path, method, schema):
 
 def service(app):
     with app.app_context():
-        service_name = app.name
+        service_name = os.getenv("APP_NAME")
         service_host = f'http://{os.getenv("CONTAINER_NAME")}:{os.getenv("APP_PORT")}'
         routes = register_routes(app)
 

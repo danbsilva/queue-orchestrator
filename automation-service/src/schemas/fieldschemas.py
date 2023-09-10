@@ -1,11 +1,16 @@
 import re
-from marshmallow import Schema, fields, validate, ValidationError
-from marshmallow.fields import Nested
+from marshmallow import Schema, fields, validate
 from src import messages
-
+from src.schemas.stepschemas import StepGetSchema
 
 def choices_type():
     return ['string', 'integer', 'float', 'boolean', 'date', 'datetime', 'time', 'list', 'dict', 'url', 'email']
+
+
+#### DYNAMIC SCHEMA ####
+class DynamicSchema(Schema):
+    class Meta:
+        ordered = True
 
 
 ### FIELDS ####
@@ -70,6 +75,7 @@ class FieldGetSchema(Schema):
     required = fields.Boolean(required=True)
     default = fields.String(required=False)
     options = fields.List(fields.String(), required=False)
+    step = fields.Nested(StepGetSchema, required=True)
 
     class Meta:
         ordered = True

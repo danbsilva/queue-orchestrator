@@ -1,5 +1,5 @@
+import os
 import requests
-from decouple import config as config_env
 from flask import session, request
 
 service_url = 'automations/'
@@ -17,7 +17,7 @@ def get_headers():
 def automations(page, per_page, search=''):
     response = requests.request(
         method='GET',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}?page={page}&per_page={per_page}&search={search}',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}?page={page}&per_page={per_page}&search={search}',
         headers=get_headers()
     )
     try:
@@ -29,7 +29,7 @@ def automations(page, per_page, search=''):
 def my_automations(page, per_page, search=''):
     response = requests.request(
         method='GET',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}me/?page={page}&per_page={per_page}&search={search}',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}me/?page={page}&per_page={per_page}&search={search}',
         headers=get_headers()
     )
     try:
@@ -40,7 +40,7 @@ def my_automations(page, per_page, search=''):
 def automation(uuid):
     response = requests.request(
         method='GET',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}{uuid}/',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}{uuid}/',
         headers=get_headers()
     )
     try:
@@ -52,7 +52,7 @@ def automation(uuid):
 def new_automation(data):
     response = requests.request(
         method='POST',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}',
         headers=get_headers(),
         json=data
 
@@ -66,7 +66,7 @@ def new_automation(data):
 def edit_automation(uuid, data):
     response = requests.request(
         method='PATCH',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}{uuid}/',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}{uuid}/',
         headers=get_headers(),
         json=data
 
@@ -80,7 +80,7 @@ def edit_automation(uuid, data):
 def delete_automation(uuid):
     response = requests.request(
         method='DELETE',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}{uuid}/',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}{uuid}/',
         headers=get_headers()
     )
     try:
@@ -93,7 +93,7 @@ def delete_automation(uuid):
 def owners(automation_uuid, page, per_page, search=''):
     response = requests.request(
         method='GET',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}{automation_uuid}/owners/?page={page}&per_page={per_page}&search={search}',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}{automation_uuid}/owners/?page={page}&per_page={per_page}&search={search}',
         headers=get_headers()
     )
     try:
@@ -105,7 +105,7 @@ def owners(automation_uuid, page, per_page, search=''):
 def new_owner(automation_uuid, data):
     response = requests.request(
         method='POST',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}{automation_uuid}/owners/',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}{automation_uuid}/owners/',
         headers=get_headers(),
         json=data
     )
@@ -118,7 +118,7 @@ def new_owner(automation_uuid, data):
 def delete_owners(automation_uuid, data):
     response = requests.request(
         method='DELETE',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}{automation_uuid}/owners/',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}{automation_uuid}/owners/',
         json=data,
         headers=get_headers()
     )
@@ -132,7 +132,7 @@ def delete_owners(automation_uuid, data):
 def steps(automation_uuid, page, per_page, search=''):
     response = requests.request(
         method='GET',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}{automation_uuid}/steps/?page={page}&per_page={per_page}&search={search}',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}{automation_uuid}/steps/?page={page}&per_page={per_page}&search={search}',
         headers=get_headers()
     )
     try:
@@ -144,7 +144,7 @@ def steps(automation_uuid, page, per_page, search=''):
 def step(uuid):
     response = requests.request(
         method='GET',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}steps/{uuid}/',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}steps/{uuid}/',
         headers=get_headers()
     )
     try:
@@ -156,7 +156,7 @@ def step(uuid):
 def new_step(automation_uuid, data):
     response = requests.request(
         method='POST',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}{automation_uuid}/steps/',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}{automation_uuid}/steps/',
         headers=get_headers(),
         json=data
 
@@ -170,7 +170,7 @@ def new_step(automation_uuid, data):
 def edit_step(uuid, data):
     response = requests.request(
         method='PATCH',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}steps/{uuid}/',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}steps/{uuid}/',
         headers=get_headers(),
         json=data
 
@@ -184,7 +184,7 @@ def edit_step(uuid, data):
 def delete_step(uuid):
     response = requests.request(
         method='DELETE',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}steps/{uuid}/',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}steps/{uuid}/',
         headers=get_headers()
     )
     try:
@@ -197,7 +197,7 @@ def delete_step(uuid):
 def fields(step_uuid, page, per_page, search=''):
     response = requests.request(
         method='GET',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}steps/{step_uuid}/fields/?page={page}&per_page={per_page}&search={search}',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}steps/{step_uuid}/fields/?page={page}&per_page={per_page}&search={search}',
         headers=get_headers()
     )
     try:
@@ -209,7 +209,7 @@ def fields(step_uuid, page, per_page, search=''):
 def field(uuid):
     response = requests.request(
         method='GET',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}steps/fields/{uuid}/',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}steps/fields/{uuid}/',
         headers=get_headers()
     )
     try:
@@ -221,7 +221,7 @@ def field(uuid):
 def new_field(step_uuid, data):
     response = requests.request(
         method='POST',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}steps/{step_uuid}/fields/',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}steps/{step_uuid}/fields/',
         headers=get_headers(),
         json=data
 
@@ -235,7 +235,7 @@ def new_field(step_uuid, data):
 def edit_field(uuid, data):
     response = requests.request(
         method='PATCH',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}steps/fields/{uuid}/',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}steps/fields/{uuid}/',
         headers=get_headers(),
         json=data
 
@@ -249,7 +249,7 @@ def edit_field(uuid, data):
 def delete_field(uuid):
     response = requests.request(
         method='DELETE',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}steps/fields/{uuid}/',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}steps/fields/{uuid}/',
         headers=get_headers()
     )
     try:
@@ -262,7 +262,7 @@ def delete_field(uuid):
 def items_by_automation(automation_uuid, page, per_page):
     response = requests.request(
         method='GET',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}{automation_uuid}/items/?page={page}&per_page={per_page}',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}{automation_uuid}/items/?page={page}&per_page={per_page}',
         headers=get_headers()
     )
     try:
@@ -274,7 +274,7 @@ def items_by_automation(automation_uuid, page, per_page):
 def items_by_step(step_uuid, page, per_page, search=''):
     response = requests.request(
         method='GET',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}steps/{step_uuid}/items/?page={page}&per_page={per_page}&search={search}',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}steps/{step_uuid}/items/?page={page}&per_page={per_page}&search={search}',
         headers=get_headers()
     )
     try:
@@ -286,7 +286,7 @@ def items_by_step(step_uuid, page, per_page, search=''):
 def item(uuid):
     response = requests.request(
         method='GET',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}items/{uuid}/',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}items/{uuid}/',
         headers=get_headers()
     )
     try:
@@ -298,7 +298,7 @@ def item(uuid):
 def new_item_by_automation(automation_uuid, data):
     response = requests.request(
         method='POST',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}{automation_uuid}/items/',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}{automation_uuid}/items/',
         headers=get_headers(),
         json=data
 
@@ -312,7 +312,7 @@ def new_item_by_automation(automation_uuid, data):
 def new_item_by_step(step_uuid, data):
     response = requests.request(
         method='POST',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}steps/{step_uuid}/items/',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}steps/{step_uuid}/items/',
         headers=get_headers(),
         json=data
 
@@ -326,7 +326,7 @@ def new_item_by_step(step_uuid, data):
 def edit_item(uuid, data):
     response = requests.request(
         method='PATCH',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}items/{uuid}/',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}items/{uuid}/',
         headers=get_headers(),
         json=data
 
@@ -340,7 +340,7 @@ def edit_item(uuid, data):
 def delete_item(uuid):
     response = requests.request(
         method='DELETE',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}items/{uuid}/',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}items/{uuid}/',
         headers=get_headers()
     )
     try:
@@ -354,7 +354,7 @@ def delete_item(uuid):
 def historic(item_uuid, page, per_page):
     response = requests.request(
         method='GET',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}items/{item_uuid}/historic/?page={page}&per_page={per_page}',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}items/{item_uuid}/historic/?page={page}&per_page={per_page}',
         headers=get_headers()
     )
     try:

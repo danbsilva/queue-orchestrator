@@ -1,6 +1,6 @@
-from decouple import config as config_env
+import os
 from threading import Thread
-from src import kafka
+from src.services.kafkaservice import KafkaService
 from src.docs import automations
 
 def filter_endpoint(endpoint_path, method, schema):
@@ -18,10 +18,11 @@ def filter_endpoint(endpoint_path, method, schema):
     else:
         return {}
 
+
 def service(app):
     with app.app_context():
-        service_name = app.name
-        service_host = f'http://{config_env("CONTAINER_NAME")}:{config_env("APP_PORT")}'
+        service_name = os.getenv("APP_NAME")
+        service_host = f'http://{os.getenv("CONTAINER_NAME")}:{os.getenv("APP_PORT")}'
         routes = register_routes(app)
 
         data = {
@@ -29,8 +30,8 @@ def service(app):
             'service_host': service_host,
             'routes': routes
         }
-
-        Thread(target=kafka.kafka_producer, args=(config_env('TOPIC_SERVICES_REGISTER'), app.name, data, )).start()
+        
+        Thread(target=KafkaService().producer, args=(os.getenv('TOPIC_SERVICES_REGISTER'), os.getenv("APP_NAME"), data, )).start()
 
 
 def register_routes(app):

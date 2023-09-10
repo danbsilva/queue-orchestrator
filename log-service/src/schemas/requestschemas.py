@@ -17,13 +17,13 @@ class RequestGetSchema(Schema):
     uuid = fields.Str(required=True)
     datetime = fields.DateTime(required=True)
     service = fields.Str(required=True)
-    transaction_id = fields.Str(required=True)
     ip = fields.Str(required=True)
     method = fields.Str(required=True)
     endpoint = fields.Str(required=True)
     params = fields.Str(required=False)
     status = fields.Int(required=True)
     duration = fields.Float(required=True)
+    transaction_id = fields.Str(required=True)
 
     class Meta:
         ordered = True

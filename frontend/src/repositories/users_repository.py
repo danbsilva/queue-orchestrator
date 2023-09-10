@@ -1,5 +1,5 @@
+import os
 import requests
-from decouple import config as config_env
 from flask import session, request
 
 service_url = 'auth/'
@@ -16,7 +16,7 @@ def headers(request):
 def users():
     response = requests.request(
         method='GET',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}users/',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}users/',
         headers=headers(request)
     )
     try:
@@ -28,7 +28,7 @@ def users():
 def me():
     response = requests.request(
         method='GET',
-        url=f'http://{config_env("GATEWAY_HOST")}{service_url}users/me/',
+        url=f'http://{os.getenv("GATEWAY_HOST")}{service_url}users/me/',
         headers=headers(request)
     )
     try:

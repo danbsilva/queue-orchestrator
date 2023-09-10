@@ -1,4 +1,4 @@
-from src import resources
+from src.controllers.stepcontroller import StepResource, StepsResource
 
 
 class StepRoutes:
@@ -6,9 +6,9 @@ class StepRoutes:
     def __init__(self, api):
 
         # Endpoints for steps
-        api.add_resource(resources.StepsResource, '/<automation_uuid>/steps/',
+        api.add_resource(StepsResource, '/<automation_uuid>/steps/',
                          methods=['POST', 'GET'])
-        api.add_resource(resources.StepResource, '/steps/<step_uuid>/',
+        api.add_resource(StepResource, '/steps/<step_uuid>/',
                          methods=['GET', 'PATCH', 'DELETE'])
 
 

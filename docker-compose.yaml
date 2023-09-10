@@ -134,7 +134,14 @@ services:
       dockerfile: Dockerfile
     container_name: gateway
     environment:
+      DEBUG: False
+      FLASK_ENV: development
+      FLASK_APP: src.app
+      APP_NAME: gateway
       APP_PORT: 2000
+      APP_HOST: 0.0.0.0
+      CONTAINER_NAME: gateway
+      ORIGIN: gateway
     ports:
       - '2000:2000'
     expose:
@@ -187,7 +194,13 @@ services:
       dockerfile: Dockerfile
     container_name: auth
     environment:
+      DEBUG: False
+      FLASK_ENV: development
+      FLASK_APP: src.app
+      APP_NAME: auth
       APP_PORT: 80
+      APP_HOST: 0.0.0.0
+      CONTAINER_NAME: auth
     ports:
       - '2001:80'
     expose:
@@ -208,57 +221,66 @@ services:
     restart: on-failure
     command: sh -c "gunicorn -b :80 main:main_app --workers 1 --threads 8 --timeout 0 --log-level debug --reload"
 
-  # # Automations
-  # automations-db:
-  #   image: postgres:alpine
-  #   container_name: dbautomations
-  #   environment:
-  #     POSTGRES_DB: automation
-  #     POSTGRES_USER: admin
-  #     POSTGRES_PASSWORD: admin
-  #   ports:
-  #     - '5403:5432'
-  #   expose:
-  #     - "5432"
-  #   networks:
-  #     - queue_orchestrator
-  #   depends_on:
-  #     gateway:
-  #       condition: service_healthy
-  #   volumes:
-  #     - dbautomations_data:/var/lib/postgresql/data
-  #   healthcheck:
-  #     test: ["CMD", "psql", "automation", "-U", "admin"]
-  #     interval: 5s
-  #     timeout: 5s
-  #     retries: 5
-  #   restart: on-failure
+  # Automations
+  automations-db:
+    image: postgres:alpine
+    container_name: dbautomations
+    environment:
+      POSTGRES_DB: automation
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - '5403:5432'
+    expose:
+      - "5432"
+    networks:
+      - queue_orchestrator
+    depends_on:
+      gateway:
+        condition: service_healthy
+    volumes:
+      - dbautomations_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "psql", "automation", "-U", "admin"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: on-failure
 
-  # automations-service:
-  #   build:
-  #     context: ./automation-service
-  #     dockerfile: Dockerfile
-  #   container_name: automations
-  #   environment:
-  #     APP_PORT: 80
-  #   ports:
-  #     - '2002:80'
-  #   expose:
-  #     - "80"
-  #   volumes:
-  #     - ./automation-service/:/app/
-  #   depends_on:
-  #     automations-db:
-  #       condition: service_healthy
-  #   healthcheck:
-  #     test: [ "CMD", "wget", "-q", "--spider", "http://localhost:80/health/" ]
-  #     interval: 5s
-  #     timeout: 5s
-  #     retries: 5
-  #   networks:
-  #     - queue_orchestrator
-  #   restart: on-failure
-  #   command: sh -c "gunicorn -b :80 main:main_app --workers 1 --threads 8 --timeout 0 --log-level debug --reload"
+  automations-service:
+    build:
+      context: ./automation-service
+      dockerfile: Dockerfile
+    container_name: automations
+    environment:
+      DEBUG: False
+      FLASK_ENV: development
+      FLASK_APP: src.app
+      APP_NAME: automations
+      APP_PORT: 80
+      APP_HOST: 0.0.0.0
+      CONTAINER_NAME: automations
+      TOPIC_PROCESSED_ITEMS: PROCESSED_ITEMS
+      TOPIC_ITEMS_IN_PROCESS: ITEMS_IN_PROCESS
+    ports:
+      - '2002:80'
+    expose:
+      - "80"
+    volumes:
+      - ./automation-service/:/app/
+      - ./.env:/app/shared.env
+    depends_on:
+      automations-db:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:80/health/" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - queue_orchestrator
+    restart: on-failure
+    command: sh -c "gunicorn -b :80 main:main_app --workers 1 --threads 8 --timeout 0 --log-level debug --reload"
 
   # Logs
   logs-db:
@@ -292,7 +314,13 @@ services:
       dockerfile: Dockerfile
     container_name: logs
     environment:
+      DEBUG: False
+      FLASK_ENV: development
+      FLASK_APP: src.app
+      APP_NAME: logs
       APP_PORT: 80
+      APP_HOST: 0.0.0.0
+      CONTAINER_NAME: logs
     ports:
       - '2003:80'
     expose:
@@ -320,7 +348,13 @@ services:
       dockerfile: Dockerfile
     container_name: notifications
     environment:
+      DEBUG: 0
+      FLASK_ENV: development
+      FLASK_APP: src.app
+      APP_NAME: notifications
       APP_PORT: 80
+      APP_HOST: 0.0.0.0
+      CONTAINER_NAME: notifications
     ports:
       - '2004:80'
     expose:
@@ -341,32 +375,39 @@ services:
     restart: always
     command: sh -c "gunicorn -b :80 main:main_app --workers 1 --threads 8 --timeout 0 --log-level debug --reload"
 
-  # # Frontend
-  # frontend:
-      # build:
-      #   context: ./frontend
-      #   dockerfile: Dockerfile
-      # container_name: frontend
-      # environment:
-      #   APP_PORT: 80
-      # ports:
-      #   - '3000:80'
-      # expose:
-      #   - "80"
-      # volumes:
-      #   - ./frontend/:/app/
-      # depends_on:
-      #   gateway:
-      #     condition: service_healthy
-      # healthcheck:
-      #   test: [ "CMD", "wget", "-q", "--spider", "http://localhost:80/health/" ]
-      #   interval: 5s
-      #   timeout: 5s
-      #   retries: 5
-      # networks:
-      #   - queue_orchestrator
-      # restart: always
-      # command: sh -c "gunicorn -b :80 main:main_app --workers 1 --threads 8 --timeout 0 --log-level debug --reload"
+  # Frontend
+  frontend:
+      build:
+        context: ./frontend
+        dockerfile: Dockerfile
+      container_name: frontend
+      environment:
+        DEBUG: False
+        FLASK_ENV: development
+        FLASK_APP: src.app
+        APP_NAME: frontend
+        APP_PORT: 3000
+        APP_HOST: 0.0.0.0
+        CONTAINER_NAME: frontend
+      ports:
+        - '3000:80'
+      expose:
+        - "80"
+      volumes:
+        - ./frontend/:/app/
+        - ./.env:/app/shared.env
+      depends_on:
+        gateway:
+          condition: service_healthy
+      healthcheck:
+        test: [ "CMD", "wget", "-q", "--spider", "http://localhost:80/health/" ]
+        interval: 5s
+        timeout: 5s
+        retries: 5
+      networks:
+        - queue_orchestrator
+      restart: always
+      command: sh -c "gunicorn -b :80 main:main_app --workers 1 --threads 8 --timeout 0 --log-level debug --reload"
 
 # Networks
 networks:

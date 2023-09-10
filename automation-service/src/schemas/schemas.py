@@ -217,6 +217,7 @@ class StepsResponseItemSchema(Schema):
     class Meta:
         ordered = True
 
+
 ### FIELDS ####
 class FieldPostSchema(Schema):
     name = fields.String(
@@ -282,6 +283,7 @@ class FieldGetSchema(Schema):
     step = Nested(StepGetSchema, required=True)
     class Meta:
         ordered = True
+
 
 
 class FieldPatchSchema(Schema):

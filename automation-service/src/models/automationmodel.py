@@ -20,6 +20,7 @@ class AutomationModel(db.Model):
     def __repr__(self):
         return f'<AutomationModel {self.name}>'
 
+
     def to_json(self):
         return {
             'id': self.id,
@@ -30,6 +31,7 @@ class AutomationModel(db.Model):
             'owners': self.owners
         }
 
+
     @staticmethod
     def create(new_automation):
         automation = AutomationModel(**new_automation)
@@ -38,6 +40,7 @@ class AutomationModel(db.Model):
         db.session.commit()
 
         return automation
+
 
     @staticmethod
     def get_all(search=''):
@@ -49,25 +52,31 @@ class AutomationModel(db.Model):
             )
         ).order_by(AutomationModel.id).all()
 
+
     @staticmethod
     def get_all_per_page(offset, per_page):
         return AutomationModel.query.offset(offset).limit(per_page).order_by(AutomationModel.id).all()
+
 
     @staticmethod
     def get_by_id(id):
         return AutomationModel.query.filter_by(id=id).first()
 
+
     @staticmethod
     def get_by_uuid(uuid):
         return AutomationModel.query.filter_by(uuid=uuid).first()
+
 
     @staticmethod
     def get_by_acronym(acronym):
         return AutomationModel.query.filter_by(acronym=acronym).first()
 
+
     @staticmethod
     def get_by_name(name):
         return AutomationModel.query.filter_by(name=name).first()
+
 
     @staticmethod
     def get_owners(automation_uuid, search=''):
@@ -80,6 +89,7 @@ class AutomationModel(db.Model):
 
         return owners
 
+
     @staticmethod
     def get_by_owner(owner_uuid, search=''):
         return AutomationModel.query.filter(
@@ -90,19 +100,22 @@ class AutomationModel(db.Model):
             ),
             text(f"CAST(owners AS TEXT) LIKE '%{owner_uuid}%'")).order_by(AutomationModel.id).all()
 
+
     @staticmethod
     def update(automation, new_automation):
         for key, value in new_automation.items():
-            setattr(AutomationModel, key, value)
+            setattr(automation, key, value)
 
         db.session.commit()
 
         return automation
 
+
     @staticmethod
     def delete(automation):
         db.session.delete(automation)
         db.session.commit()
+
 
     @staticmethod
     def add_owners(automation, owner):
@@ -113,7 +126,8 @@ class AutomationModel(db.Model):
         automation.owners = new_owners_list
         db.session.commit()
 
-        return AutomationModel
+        return automation
+
 
     @staticmethod
     def remove_owners(automation, owner):

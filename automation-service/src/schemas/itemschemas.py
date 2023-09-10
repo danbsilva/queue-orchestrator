@@ -1,7 +1,7 @@
 import re
-from marshmallow import Schema, fields, validate, ValidationError
+from marshmallow import Schema, fields, validate
 from marshmallow.fields import Nested
-from src import messages
+from src.schemas.stepschemas import StepGetSchema
 
 
 def choices_status():
@@ -18,6 +18,7 @@ class ItemGetSchema(Schema):
     uuid = fields.String(required=True)
     data = fields.Dict(required=True)
     status = fields.String(required=True)
+    step = Nested(StepGetSchema, required=True)
 
     class Meta:
         ordered = True
@@ -34,6 +35,7 @@ class ItemWithoutStepsGetSchema(Schema):
     uuid = fields.String(required=True)
     data = fields.Dict(required=True)
     status = fields.String(required=True)
+    step = Nested(StepGetSchema, required=True)
 
     class Meta:
         ordered = True

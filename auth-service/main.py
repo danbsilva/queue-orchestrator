@@ -2,8 +2,8 @@ import os
 from dotenv import load_dotenv
 
 # Load shared  and project variables
-load_dotenv('shared.env')
 load_dotenv('.env')
+load_dotenv('shared.env')
 
 
 from src import app, register
